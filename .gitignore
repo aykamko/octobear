@@ -1,7 +1,5 @@
 # Custom
-db/mongo/
-
-
+mongo/ # ignore MongoDB
 
 
 # Created by https://www.gitignore.io

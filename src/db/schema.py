@@ -1,9 +1,9 @@
-from mongokit import Document, Connection, IS, ObjectId
+from mongokit import Document, IS, ObjectId
 import datetime
 import json
 
-config = json.load(open('../config.json', 'r'));
-con = Connection()
+from .. import config
+from . import con
 
 def sid_validator(value):
     sid = re.compile(r'[0-9]')
