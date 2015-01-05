@@ -1,0 +1,24 @@
+<html>
+<body>
+  <form method="POST" action="/">
+    <ul style='list-style: none'>
+      {{ form.hidden_tag() }}
+      {% for field in form %}
+        {% if field.name != 'csrf_token' %}
+        <li>{{ field }} {{ field.label }}</li>
+        {% endif %}
+      {% endfor %}
+      <input type="submit" value="Submit">
+    </ul>
+  </form>
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <ul>
+      {% for m in messages %} 
+        <li>{{ m }}</li>
+      {% endfor %} 
+      </ul>
+    {% endif %}
+  {% endwith %}
+</body>
+</html>

@@ -1,2 +1,2 @@
 from mongokit import Connection
-con = Connection()
+connection = Connection()
