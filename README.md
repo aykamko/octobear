@@ -11,14 +11,16 @@
     projects.
     Like Rails 4.1.6 versus 4.2.0.
 
-    pip install virtualenv          // This installs virtualenv.
-    virtualenv ag-flask             // This creates a new virtual env.
-    source ag-flask/bin/activate    // This activates the virtual env.
+    `pip install virtualenv`          // This installs virtualenv.
+
+    `virtualenv ag-flask`             // This creates a new virtual env.
+
+    `source ag-flask/bin/activate`    // This activates the virtual env.
 
     Important Note: Do not place your virtual env within directories being
     tracked by Git. Every developer's virtual env should be unique, and
     you don't want to commit it. (It's really large.) I personally put my
-    virtual envs in ~, but you can do whatever floats your boat.
+    virtual envs in `~`, but you can do whatever floats your boat.
 
 2. Install necessary dependencies.
 
@@ -28,7 +30,8 @@
     You can use `pip freeze` to determine which of these packages are
     already installed.
 
-    pip install flask               // Installs flask
-    pip install mongokit            // Installs mongokit and pymongo
+    `pip install flask`               // Installs flask
+
+    `pip install mongokit`            // Installs mongokit and pymongo
 
 
