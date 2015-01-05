@@ -15,6 +15,11 @@
     virtualenv ag-flask             // This creates a new virtual env.
     source ag-flask/bin/activate    // This activates the virtual env.
 
+    Important Note: Do not place your virtual env within directories being
+    tracked by Git. Every developer's virtual env should be unique, and
+    you don't want to commit it. (It's really large.) I personally put my
+    virtual envs in ~, but you can do whatever floats your boat.
+
 2. Install necessary dependencies.
 
     (If you are using a virtualenv, this needs to be afer you activate the
