@@ -46,7 +46,7 @@ class RegistrationHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 return
             self.send_response(200)
         else:
-            selg.logger.debug('Content type is not JSON; sending 403.')
+            self.logger.debug('Content type is not JSON; sending 403.')
             self.send_error(403, 'Content type must be JSON.')
 
 def run_registration_handler(host='', port=8000):
