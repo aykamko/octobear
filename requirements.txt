@@ -1,0 +1,2 @@
+mongokit==0.9.1.1
+pymongo==2.7.2
