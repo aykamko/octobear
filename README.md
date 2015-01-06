@@ -35,3 +35,34 @@
     requirements.txt should be found in the root folder. It contains a list of
     all of the packages required a project.
 
+3. Spin up a MongoDB instance.
+
+    `mkdir -p data/db`
+    `mongod --dbpath data/db`
+
+    This will create a new databse in data/db and start a MongoDB instance. This
+    needs to run perpetually in the background as a deamon.
+
+4. Run the git infra.
+
+    `python run.py`
+
+### Things working so far:
+
+1. Registration
+
+    Running the infra will start up a RegistrationHandler that listens on port 8000.
+    If you send a POST to that port with the following JSON format, you can "register" a
+    student:
+
+    `
+    {
+      "sid": xxx,
+      "name": xxx,
+      "email": xxx,
+      "github": xxx
+    }
+    `
+
+    You can test this out by running the example Flask app. Just make sure you "enroll" an
+    SID in the class first, by adding a new Member document to the MongoDB. (See db/schema.py)
