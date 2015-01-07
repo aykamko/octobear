@@ -1,6 +1,7 @@
 # TODO: make this callable from command line with arguments
 import signal
 import sys
+import time
 from .registration_server import run_registration_handler
 
 def run():
@@ -13,6 +14,4 @@ def run():
     signal.signal(signal.SIGINT, SIGINT_handler)
     # Wait for interrupt, since signal.pause() isn't on Windows
     while True:
-    	import time
-    	print 'Waiting...'
-    	time.sleep(60)
+        time.sleep(60)

@@ -66,6 +66,6 @@
     To enroll an SID:
 
         $ python -i -m src.db.schema    # Connect to MongoDB via Python shell
-        >>> new = connection.Member
+        >>> new = connection.Member()
         >>> new['sid'] = 1234           # Create the student
         >>> new.save()
