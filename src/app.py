@@ -11,4 +11,8 @@ def run():
         sys.exit(0)
 
     signal.signal(signal.SIGINT, SIGINT_handler)
-    signal.pause()
+    # Wait for interrupt, since signal.pause() isn't on Windows
+    while True:
+    	import time
+    	print 'Waiting...'
+    	time.sleep(60)
