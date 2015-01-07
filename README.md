@@ -11,11 +11,9 @@
     projects.
     Like Rails 4.1.6 versus 4.2.0.
 
-    `pip install virtualenv`          // This installs virtualenv.
-
-    `virtualenv git-infra`            // This creates a new virtual env.
-
-    `source git-infra/bin/activate`   // This activates the virtual env.
+        $ pip install virtualenv          // This installs virtualenv.
+        $ virtualenv git-infra            // This creates a new virtual env.
+        $ source git-infra/bin/activate   // This activates the virtual env.
 
     Important Note: Do not place your virtual env within directories being
     tracked by Git. Every developer's virtual env should be unique, and
@@ -30,22 +28,22 @@
     (If you are using a virtualenv, this needs to be afer you activate the
     env. Otherwise, you'll be installing regularly.)
 
-    `pip install -r requirements.txt`
+        $ pip install -r requirements.txt
 
     requirements.txt should be found in the root folder. It contains a list of
     all of the packages required a project.
 
-3. Spin up a MongoDB instance.
+3. [Install MongoDB](http://docs.mongodb.org/manual/installation/), then spin up a MongoDB instance.
 
-    `mkdir -p data/db`
-    `mongod --dbpath data/db`
+        $ mkdir -p data/db
+        $ mongod --dbpath data/db
 
     This will create a new databse in data/db and start a MongoDB instance. This
     needs to run perpetually in the background as a deamon.
 
 4. Run the git infra.
 
-    `python run.py`
+        $ python run.py
 
 ### Things working so far:
 
@@ -55,14 +53,19 @@
     If you send a POST to that port with the following JSON format, you can "register" a
     student:
 
-    `
-    {
-      "sid": xxx,
-      "name": xxx,
-      "email": xxx,
-      "github": xxx
-    }
-    `
+        {
+          "sid": xxx,
+          "name": xxx,
+          "email": xxx,
+          "github": xxx
+        }
 
     You can test this out by running the example Flask app. Just make sure you "enroll" an
     SID in the class first, by adding a new Member document to the MongoDB. (See db/schema.py)
+
+    To enroll an SID:
+
+        $ python -i -m src.db.schema    # Connect to MongoDB via Python shell
+        >>> new = connection.Member()
+        >>> new['sid'] = 1234           # Create the student
+        >>> new.save()

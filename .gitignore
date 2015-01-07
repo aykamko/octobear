@@ -1,6 +1,8 @@
 # Ignore MongoDB
 data/
 
+# Ignore virtualenv
+git-infra/
 
 # Created by https://www.gitignore.io
 
