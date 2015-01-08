@@ -1,0 +1,11 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html lang="en">
+<body>
+	<p>Hi, {{ user.name }}! You've succesfully registered with the following info:</p>
+    <ul>
+    {% for item in ['sid', 'name', 'email', 'github'] %}
+        <li>{{ item }}: {{ user[item] }}</li>
+    {% endfor %}
+    </ul>
+</body>
+</html>

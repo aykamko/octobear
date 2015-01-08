@@ -1,2 +1,3 @@
 mongokit==0.9.1.1
 pymongo==2.7.2
+Jinja2==2.7.3

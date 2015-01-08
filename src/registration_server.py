@@ -6,6 +6,7 @@ import threading
 import logging
 import datetime
 from db.schema import connection
+import emailer
 
 class RegistrationException(Exception):
     pass
@@ -29,6 +30,7 @@ class RegistrationHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             user[u'github'] = data['github']
             user[u'registered'] = True
             user[u'time_registered'] = datetime.datetime.now()
+            emailer.send(user, '[cs61b] Registered!', 'registered.html')
         except KeyError:
             raise RegistrationException('Invalid data; missing fields.')
         user.save()
