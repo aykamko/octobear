@@ -1,4 +1,3 @@
-# TODO: make this callable from command line with arguments
 import signal
 import sys
 import time

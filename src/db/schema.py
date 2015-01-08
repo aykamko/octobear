@@ -34,7 +34,7 @@ class Member(Document):
         'email': email_validator,
         'grades': grade_validator
     }
-    required_fields = ['sid']
+    required_fields = ['sid', 'role', 'registered']
     default_values = {'role': 0, 'registered': False}
 
 @connection.register
