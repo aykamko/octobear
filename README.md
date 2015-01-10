@@ -69,3 +69,6 @@
         >>> new = connection.Member()
         >>> new['sid'] = 1234           # Create the student
         >>> new.save()
+
+
+Pass: ***REMOVED***
