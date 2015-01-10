@@ -3,7 +3,7 @@
 <body>
 	<p>Hi, {{ user.name }}! You've succesfully registered with the following info:</p>
     <ul>
-    {% for item in ['sid', 'name', 'email', 'github'] %}
+    {% for item in ['sid', 'name', 'email', 'github', 'account'] %}
         <li>{{ item }}: {{ user[item] }}</li>
     {% endfor %}
     </ul>

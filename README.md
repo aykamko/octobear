@@ -43,7 +43,14 @@
 
 4. Run the git infra.
 
+    If this is your first time, set up accounts by running with the `--init` flag.
+
+        $ python run.py --init
+
+    Otherwise, omit the flag.
+
         $ python run.py
+
 
 ### Things working so far:
 
@@ -61,11 +68,9 @@
         }
 
     You can test this out by running the example Flask app. Just make sure you "enroll" an
-    SID in the class first, by adding a new Member document to the MongoDB. (See db/schema.py)
-
-    To enroll an SID:
+    SID in the class first. To enroll an SID:
 
         $ python -i -m src.db.schema    # Connect to MongoDB via Python shell
         >>> new = connection.Member()
-        >>> new['sid'] = 1234           # Create the student
-        >>> new.save()
+        >>> new['sid'] = 1234           
+        >>> new.save()                  # Create the student

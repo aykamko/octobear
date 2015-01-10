@@ -1,4 +1,5 @@
 course_name = 61b
+class_size = 1400
 
 gh_organization = Berkeley-CS61B
 gh_user = BearBot-61B

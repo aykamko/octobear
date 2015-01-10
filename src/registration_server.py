@@ -8,6 +8,8 @@ import datetime
 
 from . import config
 
+from account.account import assign_account
+
 from db.schema import connection
 import emailer
 
@@ -38,11 +40,13 @@ class RegistrationHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             user[u'time_registered'] = datetime.datetime.now()
         except KeyError:
             raise RegistrationException('Invalid data; missing fields.')
+        free_account = assign_account()
+        user[u'account'] = free_account
         user.save()
         # user saved in db, so we can now email him and register his github repo
         emailer.send(user, '[cs61b] Registered!', 'registered.html')
         github.createEverything(
-                'test-{0}'.format(user[u'github']),
+                user[u'account'],
                 [user[u'github']],
                 'http://www.alekskamko.com'
                 )
