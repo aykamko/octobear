@@ -1,8 +1,8 @@
 import string
 import re
 import logging
-from ..db.schema import connection, Account
-from .. import config
+from db.schema import connection, Account
+from . import config
 
 logger = logging.getLogger('Account')
 account_coll = connection[config['course_name']][Account.__collection__]
@@ -14,7 +14,7 @@ def _register_num_accounts(num):
         i = 0
         for j, c1 in enumerate(' ' + alph):
             # accounts tX and iX are reserved
-            c2chars = re.sub('r[it]', '', alph) if j == 0 else alph
+            c2chars = re.sub(r'[it]', '', alph) if j == 0 else alph
             for c2 in c2chars:
                 for c3 in alph:
                     if i >= num:
