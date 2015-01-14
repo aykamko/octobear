@@ -1,2 +1,9 @@
-# git-infra-berkeley config file
-course_name 61b
+course_name = 61b
+class_size = 1400
+
+gh_organization = Berkeley-CS61B
+gh_user = BearBot-61B
+gh_pass = ***REMOVED***
+
+# logging levels based on python logging module
+log_level = 10

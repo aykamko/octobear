@@ -5,8 +5,16 @@ import json
 import threading
 import logging
 import datetime
+
+from . import config
+
+from account.account import assign_account
+
 from db.schema import connection
 import emailer
+
+from github.github import GitHub
+github = GitHub(config['gh_organization'], config['gh_user'], config['gh_pass'])
 
 class RegistrationException(Exception):
     pass
@@ -30,10 +38,18 @@ class RegistrationHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             user[u'github'] = data['github']
             user[u'registered'] = True
             user[u'time_registered'] = datetime.datetime.now()
-            emailer.send(user, '[cs61b] Registered!', 'registered.html')
         except KeyError:
             raise RegistrationException('Invalid data; missing fields.')
+        free_account = assign_account()
+        user[u'account'] = free_account
         user.save()
+        # user saved in db, so we can now email him and register his github repo
+        emailer.send(user, '[cs61b] Registered!', 'registered.html')
+        github.createEverything(
+                user[u'account'],
+                [user[u'github']],
+                'http://www.alekskamko.com'
+                )
 
     def do_POST(self):
         ctype, pdict = cgi.parse_header(self.headers.getheader('content-type'))

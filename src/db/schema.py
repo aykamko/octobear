@@ -23,6 +23,7 @@ class Member(Document):
         'sid': int,
         'login': basestring,
         'name': basestring,
+        'account': basestring,
         'email': basestring,
         'github': basestring,
         'registered': bool,
@@ -34,8 +35,19 @@ class Member(Document):
         'email': email_validator,
         'grades': grade_validator
     }
-    required_fields = ['sid']
+    required_fields = ['sid', 'role', 'registered']
     default_values = {'role': 0, 'registered': False}
+
+@connection.register
+class Account(Document):
+    __collection__ = 'accounts'
+    __database__ = config['course_name']
+    structure = {
+        'account': basestring,
+        'assigned': bool
+    }
+    required_fields = ['account', 'assigned']
+    default_values = {'assigned': False}
 
 @connection.register
 class Assignment(Document):
