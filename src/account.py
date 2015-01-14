@@ -1,26 +1,23 @@
 import string
 import re
 import logging
+import itertools
 from db.schema import connection, Account
 from . import config
 
 logger = logging.getLogger('Account')
 account_coll = connection[config['course_name']][Account.__collection__]
 
+def generate_account_list(num, minimum_length=2):
+    accounts = []
+    alph = string.lowercase
+    non_reserved = lambda account: account[0] not in ('t', 'r')
+    for length in itertools.count(minimum_length):
+        accounts.extend(map(''.join, filter(non_reserved, itertools.product(alph, repeat=length))))
+        if len(accounts) >= num:
+            return accounts[:num]
+
 def _register_num_accounts(num):
-    def generate_account_list(num):
-        accounts = []
-        alph = string.lowercase
-        i = 0
-        for j, c1 in enumerate(' ' + alph):
-            # accounts tX and iX are reserved
-            c2chars = re.sub(r'[it]', '', alph) if j == 0 else alph
-            for c2 in c2chars:
-                for c3 in alph:
-                    if i >= num:
-                        return accounts
-                    accounts.append(str(c1 + c2 + c3).strip())
-                    i += 1
 
     bulk = account_coll.initialize_ordered_bulk_op()
     for account_str in generate_account_list(num):
