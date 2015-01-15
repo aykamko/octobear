@@ -17,8 +17,6 @@ from rq import Queue
 
 import emailer
 
-from github.github import GitHub
-github = GitHub(config['gh_organization'], config['gh_user'], config['gh_pass'])
 work_queue = Queue(connection=Redis())
 
 class RegistrationException(Exception):
@@ -40,14 +38,17 @@ def register_member(data):
     except KeyError:
         raise RegistrationException('Invalid data; missing fields.')
     free_account = assign_account()
+    if free_account == None:
+        raise RegistrationException('Ran out of free account forms')
+
     user[u'account'] = free_account
     user.save()
     # user saved in db, so we can now email him and register his github repo
-    emailer.send(user, '[cs61b] Registered!', 'registered.html')
+    emailer.send(user, '[{0}] Registered!'.format(config['course_name']), 'registered.html')
     github.createEverything(
             user[u'account'],
             [user[u'github']],
-            'http://www.alekskamko.com'
+            config['jenkins_hook']
             )
 
 class RegistrationHandler(BaseHTTPServer.BaseHTTPRequestHandler):
