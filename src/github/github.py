@@ -2,6 +2,10 @@ import base64
 import json
 import requests
 import logging
+from requests import get as GET
+
+class GitHubApiError(Exception):
+    pass
 
 class GitHub:
 
@@ -13,34 +17,43 @@ class GitHub:
         self.repos = []       # contains the names of all repos
         self.teams = {}       # contains the names and ids of all teams
         self.teamMembers = {} # contains teams -> users mapping
-        self.getRepos()
+        self.loadRepos()
         self.getTeams()
 
-    # Gets all repos under course organization
-    def getRepos(self):
+    def callApi(self, requestType, endpoint, followLink=False, data=None,
+            json=None, **kwargs):
+        url = "https://api.github.com/%s" % (endpoint)
+        authPair = base64.b64encode("%s:%s" % (self.ownername, self.password))
+        authHeaders = {
+                "Authorization": "Basic %s" % (authPair),
+                }
+
+        responses = []
+        while True:
+            response = requestType(url, headers=authHeaders, data=data, json=json)
+            if response.ok:
+                responses.append(response)
+                if followLink and "next" in response.links:
+                    url = response.links["next"]
+                else:
+                    return responses
+            else:
+                raise GitHubApiError(response.content)
+
+    def parseJson(self, payload):
+        try:
+            return json.loads(payload)
+        except ValueError:
+            raise GitHubApiError("Invalid JSON in response: %s" % (payload))
+
+    # Loads all repos under course organization
+    def loadRepos(self):
         self.repos = []
-        url = "https://api.github.com/orgs/{org}/repos".format(
-            org = self.orgName
-            )
-        base64string = base64.encodestring('%s:%s' % (self.ownername, self.password)).replace('\n', '')
-        reqHeaders = { "Authorization": "Basic %s" % base64string }
-        response = requests.get(url, headers = reqHeaders)
-        resultsJson = json.loads(response.content)
-        headers = response.headers
-        for repo in resultsJson:
-            self.repos.append(repo["name"])
-
-        # Pagination
-        if "Link" in headers:
-            while "last" in headers["Link"]:
-                url = headers["Link"].strip().split(';')[0].strip()[1:-1]
-                response = requests.get(url, headers = reqHeaders)
-                resultsJson = json.loads(result.content)
-                headers = result.headers
-                for repo in resultsJson:
-                    self.repos.append(repo["name"])
-
-        return self.repos
+        endpoint = "orgs/%s/repos" % (self.orgName)
+        responses = self.callApi(GET, endpoint, followLink=True)
+        for response in responses:
+            repos = self.parseJson(response.content)
+            self.repos.extend(map(lambda repo: repo["name"], repos))
 
     # Gets all teams under course organization
     def getTeams(self):
