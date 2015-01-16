@@ -17,8 +17,7 @@ def generate_account_list(num, minimum_length=2):
         if len(accounts) >= num:
             return accounts[:num]
 
-def _register_num_accounts(num):
-
+def register_num_accounts(num):
     bulk = account_coll.initialize_ordered_bulk_op()
     for account_str in generate_account_list(num):
         account = connection.Account()
@@ -28,7 +27,7 @@ def _register_num_accounts(num):
 
 def register_accounts():
     size = int(config['class_size'])
-    return _register_num_accounts(size)
+    return register_num_accounts(size)
 
 def assign_account():
     free = account_coll.find_and_modify(
