@@ -4,6 +4,13 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from jinja2 import Environment, PackageLoader
 
+def send_plaintext(to_address, subject, plaintext):
+    # TODO: @austin
+    pass
+
+def send_html(to_address, subject, html_string):
+    # TODO: @austin
+    pass
 
 def send(user, subject, template):
     # me == my email address
@@ -19,7 +26,7 @@ def send(user, subject, template):
 
     # Create the body of the message (a plain-text and an HTML version).
     text = "HTML failed to render =(.\nPlease let us know about this!"
-    
+
     # Render the HTML version
     env = Environment(loader=PackageLoader('src'))
     template = env.get_template(template)

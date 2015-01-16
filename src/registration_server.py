@@ -67,7 +67,7 @@ class RegistrationHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.logger.debug('Content type is not JSON; sending 403.')
             self.send_error(403, 'Content type must be JSON.')
 
-def run_registration_handler(host='', port=config['registration_server_port']):
+def run_registration_server(host='', port=int(config['registration_server_port'])):
     server_address = (host, port)
     server = SocketServer.TCPServer(server_address, RegistrationHandler)
 
