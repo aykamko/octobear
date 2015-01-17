@@ -52,23 +52,62 @@
         $ python run.py
 
 
+### API
+
+1. Registration
+
+    To register a student, send a POST request to the RegistrationHandler in
+    the following format:
+
+        HTTP Header: 
+          { 
+            'Content-Type': 'application/json' 
+          }
+
+        Content:
+          {
+            "sid": Number,
+            "name": String,
+            "email": String,
+            "github": String
+          }
+
+2. Autograder Results
+
+    To record results from a run of an autograder, send a POST requst to the
+    AutograderResultHandler in the following format:
+
+        HTTP Header: 
+          { 
+            'Content-Type': 'application/json' 
+          }
+
+        Content:
+          {
+            ------ Required Fields ------
+            "score":         Number,
+            "assignment":    String,
+            "login":         String,
+            "submit":        Boolean,   # switch to record grade in database (or not)
+
+            ------ Optional Fields ------
+            "grader_login":  String,
+            "comments":      String,
+            "raw_output":    String,    # raw output of autograder, for logging
+            "email":         Boolean,   # switch to email student (or not)
+            "email_plain":   Boolean,   # True => plaintext format, False => HTML format
+            "email_content": String
+          }
+
 ### Things working so far:
 
 1. Registration
 
-    Running the infra will start up a RegistrationHandler that listens on port 8000.
-    If you send a POST to that port with the following JSON format, you can "register" a
-    student:
+    Running the infra will start up a RegistrationHandler that listens on port 8000. 
+    Read the above API section to see how to use it.
 
-        {
-          "sid": xxx,
-          "name": xxx,
-          "email": xxx,
-          "github": xxx
-        }
-
-    You can test this out by running the example Flask app. Just make sure you "enroll" an
-    SID in the class first. To enroll an SID:
+    You can test this out registration by running the example Flask app. Just
+    make sure you "enroll" an SID in the class first. To enroll an SID:
 
         $ python -i -m src.db.schema    # Connect to MongoDB via Python shell
         >>> new = connection.Member()
