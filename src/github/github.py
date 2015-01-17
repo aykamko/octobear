@@ -154,9 +154,8 @@ class GitHub:
             "permission": "push",
             }
         endpoint = "orgs/%s/teams" % (self.orgName)
-        responses = self.callApi(POST, endpoint, json=postData)
+        response, = self.callApi(POST, endpoint, json=postData)
 
-        response = responses[0]
         try:
             return self.parseJson(response)["id"]
         except (TypeError, KeyError) as e:
