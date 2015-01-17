@@ -2,6 +2,11 @@ import base64
 import json
 import requests
 import logging
+import re
+from requests import get as GET, post as POST, delete as DELETE, put as PUT
+
+class GitHubApiError(Exception):
+    pass
 
 class GitHub:
 
@@ -10,309 +15,180 @@ class GitHub:
         self.ownername = ownername
         self.password = password
         self.orgName = orgName
-        self.repos = []       # contains the names of all repos
-        self.teams = {}       # contains the names and ids of all teams
-        self.teamMembers = {} # contains teams -> users mapping
-        self.getRepos()
-        self.getTeams()
 
-    # Gets all repos under course organization
-    def getRepos(self):
-        self.repos = []
-        url = "https://api.github.com/orgs/{org}/repos".format(
-            org = self.orgName
-            )
-        base64string = base64.encodestring('%s:%s' % (self.ownername, self.password)).replace('\n', '')
-        reqHeaders = { "Authorization": "Basic %s" % base64string }
-        response = requests.get(url, headers = reqHeaders)
-        resultsJson = json.loads(response.content)
-        headers = response.headers
-        for repo in resultsJson:
-            self.repos.append(repo["name"])
+    def callApi(self, requestType, endpoint, followLink=False, **kwargs):
+        url = "https://api.github.com/%s" % (endpoint)
+        authPair = base64.b64encode("%s:%s" % (self.ownername, self.password))
+        headers = {
+                "Authorization": "Basic %s" % (authPair),
+                }
 
-        # Pagination
-        if "Link" in headers:
-            while "last" in headers["Link"]:
-                url = headers["Link"].strip().split(';')[0].strip()[1:-1]
-                response = requests.get(url, headers = reqHeaders)
-                resultsJson = json.loads(result.content)
-                headers = result.headers
-                for repo in resultsJson:
-                    self.repos.append(repo["name"])
+        # Support for additional headers in kwargs. (Can override Authorization)
+        if 'headers' in kwargs:
+            headers.update(kwargs['headers'])
+        kwargs['headers'] = headers
 
-        return self.repos
+        responses = []
+        while True:
+            response = requestType(url, **kwargs)
+            if response.ok:
+                responses.append(response)
+                if followLink and "next" in response.links:
+                    url = response.links["next"]
+                else:
+                    return responses
+            else:
+                raise GitHubApiError(response.content)
 
-    # Gets all teams under course organization
-    def getTeams(self):
-        self.teams = {}
-        self.teamMembers = {}
-        url = "https://api.github.com/orgs/{org}/teams".format(
-            org = self.orgName
-            )
-        base64string = base64.encodestring('%s:%s' % (self.ownername, self.password)).replace('\n', '')
-        reqHeaders = { "Authorization": "Basic %s" % base64string }
-        response = requests.get(url, headers = reqHeaders)
-        resultsJson = json.loads(response.content)
-        headers = response.headers
-        for t in resultsJson:
-            self.teams[t["name"]] = str(t["id"])
-            self.getTeamMembers(t["name"])
+    def parseJson(self, response):
+        try:
+            return response.json()
+        except ValueError:
+            raise GitHubApiError("Invalid JSON in response: %s" % (response.content))
 
-        # Pagination
-        if "Link" in headers:
-            while "last" in headers["Link"]:
-                url = headers["Link"].strip().split(';')[0].strip()[1:-1]
-                response = requests.get(url, headers = reqHeaders)
-                resultsJson = json.loads(result.content)
-                headers = result.headers
-                for t in resultsJson:
-                    self.teams[t["name"]] =  str(t["id"] )
-                    self.getTeamMembers(t["name"])
+    # Sanity check to make sure functions are being used correctly
+    def checkNumeric(self, number):
+        if type(number) not in (int, str) or not str(number).isdigit():
+            raise ValueError("Sanity check: %s should be an ID" % (number))
 
-        return (self.teams, self.teamMembers)
+    # Usernames are untrusted user input, so check 'em
+    def checkUsername(self, username):
+        if type(username) is not str or \
+                re.match(r"^[a-zA-Z0-9][a-zA-Z0-9-]*$", username) is None:
+            raise GitHubApiError("Invalid GitHub username: %s" % (username))
 
-    # Gets all team members in course organization
-    def getTeamMembers(self, teamName):
-        teamID = self.teams[teamName]
-        self.teamMembers[teamID] = []
-        url = "https://api.github.com/teams/{team}/members".format(
-            team = teamID
-            )
-        base64string = base64.encodestring('%s:%s' % (self.ownername, self.password)).replace('\n', '')
-        reqHeaders = { "Authorization": "Basic %s" % base64string }
-        response = requests.get(url, headers = reqHeaders)
-        resultsJson = json.loads(response.content)
-        headers = response.headers
-        for t in resultsJson:
-            self.teamMembers[teamID].append(t["login"])
+    def getTeamIDsByName(self):
+        teamIDsByName = {}
+        endpoint = "orgs/%s/teams" % (self.orgName)
+        responses = self.callApi(GET, endpoint, followLink=True)
+        for response in responses:
+            teams = self.parseJson(response)
+            for team in teams:
+                teamName = team["name"]
+                teamID = team["id"]
+                teamIDsByName[teamName] = str(teamID)
+        return teamIDsByName
 
-        # Pagination
-        if "Link" in headers:
-            while "last" in headers["Link"]:
-                url = headers["Link"].strip().split(';')[0].strip()[1:-1]
-                response = requests.get(url, headers = reqHeaders)
-                resultsJson = json.loads(result.content)
-                headers = result.headers
-                for t in resultsJson:
-                    self.teamMembers[teamID].append(t["login"])
+    # Gets members of a team
+    def getTeamMembers(self, teamID):
+        self.checkNumeric(teamID)
+        endpoint = "teams/%s/members" % (teamID)
+        responses = self.callApi(GET, endpoint, followLink=True)
 
-        return self.teamMembers[teamID]
+        usernames = []
+        for response in responses:
+            members = self.parseJson(response)
+            usernames.extend([member["login"] for member in members])
 
-    # lists hooks for a repo
+        return usernames
+
+    # Lists hooks for a repo (for debugging only)
     def listHooks(self, repoName):
-        try:
-            url = "https://api.github.com/repos/{org}/{repo}/hooks".format(
-                org = self.orgName,
-                repo = repoName
-                )
-            base64string = base64.encodestring('%s:%s' % (self.ownername, self.password)).replace('\n', '')
-            reqHeaders = { "Authorization": "Basic %s" % base64string }
-            response = requests.get(url, headers = reqHeaders)
-            resultsJson = json.loads(response.content)
-            for hook in resultsJson:
+        endpoint = "repos/%s/%s/hooks" % (self.orgName, repoName)
+        responses = self.callApi(GET, endpoint, followLink=True)
+        for response in responses:
+            for hook in self.parseJson(response):
                 print repoName, json.dumps(hook, indent=4, sort_keys=True)
-        except Exception as e:
-            self.logger.exception(e)
 
-    # gets email of a user
+    # Gets email of a user
     def getEmail(self, username):
+        self.checkUsername(username)
+        endpoint = "users/%s" % (username)
+        response, = self.callApi(GET, endpoint)
+
         try:
-            url = "https://api.github.com/users/{user}".format(
-                user = username
-                )
-            base64string = base64.encodestring('%s:%s' % (self.ownername, self.password)).replace('\n', '')
-            reqHeaders = { "Authorization": "Basic %s" % base64string }
-            response = requests.get(url, headers = reqHeaders)
-            resultsJson = json.loads(response.content)
-            return resultsJson["email"]
-        except Exception as e:
-            self.logger.exception(e)
+            return self.parseJson(response)["email"]
+        except (TypeError, KeyError) as e:
+            raise GitHubApiError(e.message)
+
+    def getTeamID(self, teamName):
+        teamIDsByName = self.getTeamIDsByName()
+        return teamIDsByName[teamName]
 
     # Delete a repo. Does not delete teams or users.
     def deleteRepo(self, repoName):
-        try:
-            self.repos = []
-            url = "https://api.github.com/repos/{org}/{repo}".format(
-                org = self.orgName,
-                repo = repoName
-                )
-            base64string = base64.encodestring('%s:%s' % (self.ownername, self.password)).replace('\n', '')
-            reqHeaders = { "Authorization": "Basic %s" % base64string }
-            response = requests.delete(url, headers = reqHeaders)
-            return 0 if response.ok else -1
-        except Exception as e:
-            self.logger.exception(e)
-            return -1
+        endpoint = "repos/%s/%s" % (self.orgName, repoName)
+        self.callApi(DELETE, endpoint)
 
-    # Deletes a team. To remove all members as well as a team, remove the members first, and then the team
-    def deleteTeam(self, teamName):
-        if teamName not in self.teams:
-            return -2
-        teamID = self.teams[teamName]
-        try:
-            url = "https://api.github.com/teams/{team}".format(
-                team = teamID
-                )
-            base64string = base64.encodestring('%s:%s' % (self.ownername, self.password)).replace('\n', '')
-            reqHeaders = { "Authorization": "Basic %s" % base64string }
-            response = requests.delete(url, headers = reqHeaders)
-            return 0 if response.ok else -1
-        except Exception as e:
-            self.logger.exception(e)
-            return -1
+    # Deletes a team. Make sure to remove the members first, and then the team!
+    def deleteTeam(self, teamID):
+        endpoint = "teams/%s" % (teamID)
+        self.callApi(DELETE, endpoint)
 
     # Deletes a member from the organization
-    def deleteMember(self, memberID):
-        try:
-            self.repos = []
-            url = "https://api.github.com/orgs/{org}/members/{member}".format(
-                org = self.orgName,
-                member = memberID
-                )
-            base64string = base64.encodestring('%s:%s' % (self.ownername, self.password)).replace('\n', '')
-            reqHeaders = { "Authorization": "Basic %s" % base64string }
-            response = requests.delete(url, headers = reqHeaders)
-            return 0 if response.ok else -1
-        except Exception as e:
-            self.logger.exception(e)
-            return -1
+    def deleteMember(self, username):
+        endpoint = "orgs/%s/members/%s" % (self.orgName, username)
+        self.callApi(DELETE, endpoint)
 
-    # Delete a repo, team and members from the organization
-    # Note this also deletes a member from an organization
+    # Delete a repo, team, and members from the organization
     def deleteRepoAndTeamAndMembers(self, repoName, teamName=None):
-        if teamName == None:
+        if teamName is None:
             teamName = repoName
         self.deleteRepo(repoName)
-        teamID = self.teams[repoName]
-        for member in self.teamMembers[teamID]:
-            self.deleteMember(member)
-        self.deleteTeam(teamName)
+        teamID = self.getTeamID(teamName)
+        for username in self.getTeamMembers(teamID):
+            self.deleteMember(username)
+        self.deleteTeam(teamID)
 
     # Creates a repo
     def createRepo(self, repoName):
-        try:
-            postData = {
+        postData = {
                 "name": repoName,
                 "private": True
                 }
-            url = "https://api.github.com/orgs/{org}/repos".format(
-                org = self.orgName
-                )
-            base64string = base64.encodestring('%s:%s' % (self.ownername, self.password)).replace('\n', '')
-            reqHeaders = { "Authorization": "Basic %s" % base64string }
-            response = requests.post(url, data = json.dumps(postData), headers = reqHeaders)
-            if response.ok:
-                self.repos.append(repoName)
-                return 0
-            else:
-                return -1
-        except Exception as e:
-            self.logger.exception(e)
-            return -1
+        endpoint = "orgs/%s/repos" % (self.orgName)
+        response, = self.callApi(POST, endpoint, json=postData)
+
+        try:
+            return self.parseJson(response)["id"]
+        except (TypeError, KeyError) as e:
+            raise GitHubApiError(e.message)
 
     # Creates a team
     def createTeam(self, repoName, teamName=None):
         if teamName == None:
             teamName = repoName
+        postData = {
+            "name": teamName,
+            "repo_names": ["%s/%s" % (self.orgName, repoName)],
+            "permission": "push",
+            }
+        endpoint = "orgs/%s/teams" % (self.orgName)
+        response, = self.callApi(POST, endpoint, json=postData)
+
         try:
-            postData = {
-                "name": teamName,
-                "repo_names": [self.orgName + "/" + repoName],
-                "permission": "push"
-                }
-            url = "https://api.github.com/orgs/{org}/teams".format(
-                org = self.orgName
-                )
-            base64string = base64.encodestring('%s:%s' % (self.ownername, self.password)).replace('\n', '')
-            reqHeaders = { "Authorization": "Basic %s" % base64string }
-            response = requests.post(url, data = json.dumps(postData), headers = reqHeaders)
-            if response.ok:
-                resultsJson = json.loads(response.content)
-                self.teams[resultsJson["name"]] = str(resultsJson["id"])
-                return 0
-            else:
-                import pdb; pdb.set_trace()
-                return -1
-        except Exception as e:
-            self.logger.exception(e)
-            return -1
+            return self.parseJson(response)["id"]
+        except (TypeError, KeyError) as e:
+            raise GitHubApiError(e.message)
 
     # Adds team members
-    def addTeamMembers(self, teamName, members):
-        teamID = self.teams[teamName]
-        if teamID not in self.teamMembers:
-            self.teamMembers[teamID] = []
-        try:
-            for member in members:
-                member = member.strip()
-                url = "https://api.github.com/teams/{team}/memberships/{member}".format(
-                    team = teamID,
-                    member = member
-                    )
-                base64string = base64.encodestring('%s:%s' % (self.ownername, self.password)).replace('\n', '')
-                reqHeaders = {
-                    "Authorization": "Basic %s" % base64string,
-                    "Accept": "application/vnd.github.the-wasp-preview+json"
-                    }
-                response = requests.put(url, headers = reqHeaders)
-                if response.ok:
-                    self.teamMembers[teamID].append(str(member.strip()))
-                else:
-                    return -1
-        except Exception as e:
-            self.logger.exception(e)
-            return -1
-        return 0
+    def addTeamMembers(self, teamID, members):
+        self.checkNumeric(teamID)
+        map(self.checkUsername, members)
+        for member in members:
+            endpoint = "teams/%s/memberships/%s" % (teamID, member)
+            self.callApi(PUT, endpoint)
 
     # Adds the jenkins hook to the repo
     def createHook(self, repoName, jenkinsHookURL):
-        try:
-            jenkinsHook = {
+        postData = {
                 "name": "jenkins",
                 "config": {"url": jenkinsHookURL},
-                "events": ["push"]
+                "events": ["push"],
                 }
-            url = "https://api.github.com/repos/{org}/{repo}/hooks".format(
-                org = self.orgName,
-                repo = repoName
-                )
-            base64string = base64.encodestring('%s:%s' % (self.ownername, self.password)).replace('\n', '')
-            reqHeaders = { "Authorization": "Basic %s" % base64string }
-            response = requests.post(url, data = json.dumps(jenkinsHook), headers = reqHeaders)
-            return 0 if response.ok else -1
-        except Exception as e:
-            self.logger.exception(e)
+        endpoint = "repos/%s/%s/hooks" % (self.orgName, repoName)
+        self.callApi(POST, endpoint, json=postData)
 
     # Creates everything -> a repo, a teamname (same as the repo unless otherwise specified), adds team members, and adds the jenkins hook
     def createEverything(self, repoName, members, hook, teamName=None):
         if teamName == None:
             teamName = repoName
 
-        ret = self.createRepo(repoName)
-        if ret != 0:
-            self.logger.debug('Could not create repo: {0}'.format(repoName))
-            return -1
-        self.logger.debug('Created repo: {0}'.format(repoName))
+        repoID = self.createRepo(repoName)
+        teamID = self.createTeam(teamName)
 
-        ret = self.createTeam(teamName)
-        if ret != 0:
-            self.logger.debug('Could not team: {0}'.format(teamName))
-            return -1
-        self.logger.debug('Created team: {0}'.format(teamName))
-
-        ret = self.addTeamMembers(teamName, members)
-        if ret != 0:
-            self.logger.debug('Could not add team members: {0}'.format(members))
-            return -1
-        self.logger.debug('Added team members: {0}'.format(members))
-
-        ret = self.createHook(repoName, hook)
-        if ret != 0:
-            self.logger.debug('Could not add hook: {0}'.format(hook))
-            return -1
-        self.logger.debug('Added hook: {0}'.format(hook))
-
-        return 0
+        self.addTeamMembers(teamID, members)
+        self.createHook(repoName, hook)
 
 # disable logging for requests module
 logging.getLogger('requests').setLevel(logging.WARNING)
