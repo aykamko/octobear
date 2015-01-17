@@ -44,7 +44,7 @@ class RegistrationHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         user[u'account'] = free_account
         user.save()
         # user saved in db, so we can now email him and register his github repo
-        emailer.send(user, '[cs61b] Registered!', 'registered.html')
+        emailer.send_template(user[u'email'], '[cs61b] Registered!', 'registered.html', user=user)
         github.createEverything(
                 user[u'account'],
                 [user[u'github']],

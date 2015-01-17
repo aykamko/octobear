@@ -13,20 +13,20 @@ def send_html(to_address, subject, html_string):
     # TODO: @austin
     pass
 
-def send(user, subject, template):
+def send_template(to_address, subject, template_name, **kwargs):
     # Create message container - the correct MIME type is multipart/alternative.
     msg = MIMEMultipart('alternative')
     msg['Subject'] = subject
     msg['From'] = config['email_from']
-    msg['To'] = user[u'email']
+    msg['To'] = to_address
 
     # Create the body of the message (a plain-text and an HTML version).
     text = "HTML failed to render =(.\nPlease let us know about this!"
 
     # Render the HTML version
     env = Environment(loader=PackageLoader('src'))
-    template = env.get_template(template)
-    html = template.render(user=user)
+    template = env.get_template(template_name)
+    html = template.render(kwargs)
 
     # Record the MIME types of both parts - text/plain and text/html.
     part1 = MIMEText(text, 'plain')
