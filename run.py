@@ -3,6 +3,7 @@ import argparse
 from src import app, roster, account
 
 if __name__ == '__main__':
+    print 'Starting...'
     parser = argparse.ArgumentParser(
             description='Run deamons for git infrastructure.')
     parser.add_argument('--roster',

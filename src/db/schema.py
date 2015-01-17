@@ -1,4 +1,4 @@
-from mongokit import Document, IS, ObjectId
+from mongokit import Document, IS, ObjectId, Set
 import datetime
 import json
 import re
@@ -10,10 +10,14 @@ def email_validator(value):
     email = re.compile(r'(?:^|\s)[-a-z0-9_.]+@(?:[-a-z0-9]+\.)+[a-z]{2,6}(?:\s|$)',re.IGNORECASE)
     return bool(email.match(value))
 def grade_validator(grade_ids):
-    for grade_obj in connection.Grade.find({'_id': {'$in': grade_ids}}):
+    for grade_obj in connection.Grade.find({'_id': {'$in': list(grade_ids)}}):
         if type(grade_obj) != Grade:
             return False
     return True
+def id_class_validator(_class):
+    def validator(obj_id):
+        return bool(connection[_class.__name__].find_one({'_id': obj_id}))
+    return validator
 
 @connection.register
 class Member(Document):
@@ -23,13 +27,12 @@ class Member(Document):
         'sid': int,
         'login': basestring,
         'name': basestring,
-        'account': basestring,
         'email': basestring,
         'github': basestring,
         'registered': bool,
         'time_registered': datetime.datetime,
         'role': IS(0, 1, 2, 3), # 0: student; 1: reader; 2: ta; 3: instructor
-        'grades': [ObjectId]
+        'grades': Set(ObjectId) # Grade
     }
     validators = {
         'email': email_validator,
@@ -65,10 +68,23 @@ class Grade(Document):
     __collection__ = 'grades'
     __database__ = config['course_name']
     structure = {
-        'assignment': Assignment,
-        'student': Member,
+        'assignment': ObjectId, # Assignment
+        'student': ObjectId, # Member
         'score': int,
-        'grader': Member,
+        'grader': ObjectId, # Member
         'comments': basestring
     }
+    validators = {
+        'assignment': id_class_validator(Assignment),
+        'student': id_class_validator(Member),
+        'grader': id_class_validator(Member)
+    }
     required_fields = ['assignment', 'student']
+
+    def save(self, uuid=False, validate=None, safe=True, *args, **kwargs):
+        if validate is True or (validate is None and self.skip_validation is False):
+            self.validate(auto_migrate=False)
+        student = self['student']
+        student['grades'].add(self['_id'])
+        student.save()
+        super(Grade, self).save(self, uuid, False, safe, *args, **kwargs)

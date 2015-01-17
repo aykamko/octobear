@@ -28,19 +28,22 @@ def handle_result(data):
     except KeyError:
         # TODO: log bad data
         return
-    assignment = connection.Assignments.find_one({'name': assignment_name})
+    assignment = connection.Assignment.find_one({'name': assignment_name})
     student = connection.Member.find_one({'login': student_login});
     if not assignment or not student:
         # TODO: log error
         return
     if submit:
         grader = connection.Member.find_one({'login': grader_login});
-        # update grade, else insert
-        grade_coll.update(
-                {'assignment': assignment, 'student': student},
-                {'$set': {'score': score, 'grader': grader, 'comments': comments}},
+        result = grade_coll.update(
+                {'assignment': assignment['_id'], 'student': student['_id']},
+                {'$set': {'score': score, 'grader': (None if not grader else grader['_id']), 'comments': comments}},
                 upsert=True
                 )
+        if 'upserted' in result:
+            new_grade_id = result['upserted']
+            student['grades'].add(new_grade_id)
+            student.save()
     if email and (email_content and len(email_content)):
         to = student['email']
         subject = '[{0}-ag] {1} Results'.format(config['course-name'], assignment['name'])
@@ -59,7 +62,11 @@ class AutograderResultHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         BaseHTTPServer.BaseHTTPRequestHandler.__init__(self, request, client_address, server)
 
     def do_POST(self):
-        ctype, pdict = cgi.parse_header(self.headers.getheader('content-type'))
+        try:
+            ctype, pdict = cgi.parse_header(self.headers.getheader('content-type'))
+        except Exception:
+            self.send_error(403, 'No Content-Type in header.')
+            return
         if ctype == 'application/json':
             length = int(self.headers.getheader('content-length'))
             data = json.loads(self.rfile.read(length))
@@ -71,6 +78,10 @@ class AutograderResultHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.logger.debug('Content type is not JSON; sending 403.')
             self.send_error(403, 'Content type must be JSON.')
 
+    def shutdown(self):
+        self.logger.debug('Shutting down.')
+        super(self.__class__, self).shutdown(self)
+
 def run_ag_result_server(host='', port=int(config['ag_result_server_port'])):
     server_address = (host, port)
     server = SocketServer.TCPServer(server_address, AutograderResultHandler)
@@ -81,3 +92,4 @@ def run_ag_result_server(host='', port=int(config['ag_result_server_port'])):
 
     logger = logging.getLogger('ag_result_server')
     logger.debug('AutograderResultHandler started on {0}'.format(server.server_address))
+    return server

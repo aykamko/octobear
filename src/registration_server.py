@@ -67,6 +67,10 @@ class RegistrationHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.logger.debug('Content type is not JSON; sending 403.')
             self.send_error(403, 'Content type must be JSON.')
 
+    def shutdown(self):
+        self.logger.debug('Shutting down.')
+        super(self.__class__, self).shutdown(self)
+
 def run_registration_server(host='', port=int(config['registration_server_port'])):
     server_address = (host, port)
     server = SocketServer.TCPServer(server_address, RegistrationHandler)
@@ -77,3 +81,4 @@ def run_registration_server(host='', port=int(config['registration_server_port']
 
     logger = logging.getLogger('registration_server')
     logger.debug('RegistrationHandler started on {0}'.format(server.server_address))
+    return server
