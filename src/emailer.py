@@ -8,7 +8,7 @@ def send_plaintext(to_address, subject, plaintext):
     # TODO: @austin
     pass
 
-def send_html(to_address, subject, html_string):
+def send_markdown(to_address, subject, html_string):
     # TODO: @austin
     pass
 

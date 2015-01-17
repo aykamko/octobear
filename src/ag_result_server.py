@@ -21,10 +21,9 @@ def handle_result(data):
         # optional
         grader_login    = data.get('grader_login')
         comments        = data.get('comments')
-        raw_output      = data.get('raw_output')
-        email           = bool(data.get('email'))
-        email_plain     = bool(data.get('email_plaintext'))
         email_content   = data.get('email_content')
+        email_plain     = bool(data.get('email_plain'))
+        raw_output      = data.get('raw_output')
     except KeyError:
         # TODO: log bad data
         return
@@ -44,13 +43,13 @@ def handle_result(data):
             new_grade_id = result['upserted']
             student['grades'].add(new_grade_id)
             student.save()
-    if email and (email_content and len(email_content)):
+    if email_content and len(email_content):
         to = student['email']
         subject = '[{0}-ag] {1} Results'.format(config['course-name'], assignment['name'])
         if email_plain:
             emailer.send_plaintext(to, subject, email_content);
         else:
-            emailer.send_html(to, subject, email_content);
+            emailer.send_markdown(to, subject, email_content);
     if raw_output and len(raw_output):
         # TODO: log raw_output somewhere
         pass
