@@ -82,9 +82,8 @@ class Grade(Document):
     required_fields = ['assignment', 'student']
 
     def save(self, uuid=False, validate=None, safe=True, *args, **kwargs):
-        if validate is True or (validate is None and self.skip_validation is False):
-            self.validate(auto_migrate=False)
-        student = self['student']
+        Document.save(self, uuid, validate, safe, *args, **kwargs)
+        student_id = self['student']
+        student = connection.Member.find_one({'_id': student_id})
         student['grades'].add(self['_id'])
         student.save()
-        super(Grade, self).save(self, uuid, False, safe, *args, **kwargs)
