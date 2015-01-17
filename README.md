@@ -93,11 +93,13 @@
             ------ Optional Fields ------
             "grader_login":  String,
             "comments":      String,
-            "raw_output":    String,    # raw output of autograder, for logging
-            "email":         Boolean,   # switch to email student (or not)
-            "email_plain":   Boolean,   # True => plaintext format, False => HTML format
-            "email_content": String
+            "email_content": String,    # email to send student
+            "email_plain":   Boolean,   # True => plaintext format, Default/False => Markdown format
+            "raw_output":    String     # raw output of autograder, for logging
           }
+
+    Emails will be compiled as Markdown unless otherwise specified by the
+    `email_plain` Boolean field. HTML in the Markdown will not be compiled.
 
 ### Things working so far:
 
