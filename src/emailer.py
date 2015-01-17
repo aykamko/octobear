@@ -1,4 +1,5 @@
 import smtplib
+import markdown2
 
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -44,6 +45,11 @@ def send_template(to_address, subject, template_name, **kwargs):
 
     send_html(to_address, subject, html)
 
+# Renders the given markdown to HTML, then emails it
+def send_markdown(to_address, subject, markdown):
+    html = markdown2.markdown(markdown, safe_mode='escape')
+    send_html(to_address, subject, html)
+
 # Authenticates, then actually sends the message
 def _send(msg):
     s = smtplib.SMTP(config['smtp_host'], int(config['smtp_port']))
@@ -69,3 +75,8 @@ if __name__ == "__main__":
         '[cs61b] Template.', 
         'registered.html',  
         user={'email': 'akrolsmir@gmail.com', 'github': 'rimslorka'})
+
+    send_markdown(
+        'akrolsmir@gmail.com', 
+        '[cs61b] Markdown!', 
+        '*This is the html version*. <b>Were the gats escaped?</b>')
