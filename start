@@ -1,0 +1,3 @@
+#!/bin/bash
+python run.py &
+python -m src.162Worker.py
