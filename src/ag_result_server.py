@@ -10,6 +10,12 @@ from . import config
 from db.schema import connection, Assignment, Member, Grade
 import emailer
 
+
+from redis import Redis
+from rq import Queue
+
+
+work_queue = Queue(connection=Redis())
 grade_coll = connection[config['course_name']][Grade.__collection__]
 def handle_result(data):
     try:
@@ -71,7 +77,7 @@ class AutograderResultHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             data = json.loads(self.rfile.read(length))
             self.logger.debug('Recieved autograder result: {0}'.format(data))
             # TODO: stub for @Vaishaal
-            handle_result(data);
+            work_queue.enqueue(handle_result,data)
             self.send_response(200)
         else:
             self.logger.debug('Content type is not JSON; sending 403.')
