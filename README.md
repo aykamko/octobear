@@ -1,4 +1,4 @@
-# Git Infrastructure for Berkeley EECS
+# Octobear: A git Infrastructure for Berkeley EECS
 
 ### Initial Setup
 
