@@ -1,13 +1,20 @@
 import signal
 import sys
 import time
-from .registration_server import run_registration_handler
+from . import config
+from .registration_server import run_registration_server
+from .ag_result_server import run_ag_result_server
+from .queue_worker import start as start_queue_worker
 
 def run():
-    run_registration_handler()
+    rserver = run_registration_server(port=int(config['registration_server_port']))
+    agserver = run_ag_result_server(port=int(config['ag_result_server_port']))
+    start_queue_worker()
 
     def SIGINT_handler(signal, frame):
         print '\rExiting...'
+        rserver.shutdown();
+        agserver.shutdown();
         sys.exit(0)
 
     signal.signal(signal.SIGINT, SIGINT_handler)

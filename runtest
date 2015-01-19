@@ -1,0 +1,5 @@
+#!/bin/bash
+base=$(basename $1)
+filename=${base%.*}
+# python -m src.queue_worker &
+python -m test.$filename

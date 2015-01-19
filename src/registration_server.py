@@ -8,7 +8,7 @@ import datetime
 
 from . import config
 
-from account.account import assign_account
+import account
 
 from db.schema import connection
 
@@ -37,16 +37,16 @@ def register_member(data):
         user[u'time_registered'] = datetime.datetime.now()
     except KeyError:
         raise RegistrationException('Invalid data; missing fields.')
-    free_account = assign_account()
+    free_account = account.assign_account()
     if free_account == None:
         raise RegistrationException('Ran out of free account forms')
 
-    user[u'account'] = free_account
+    user[u'login'] = free_account
     user.save()
     # user saved in db, so we can now email him and register his github repo
     emailer.send(user, '[{0}] Registered!'.format(config['course_name']), 'registered.html')
     github.createEverything(
-            user[u'account'],
+            user[u'login'],
             [user[u'github']],
             config['jenkins_hook']
             )
@@ -68,7 +68,11 @@ class RegistrationHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.logger.debug('Content type is not JSON; sending 403.')
             self.send_error(403, 'Content type must be JSON.')
 
-def run_registration_handler(host='', port=8000):
+    def shutdown(self):
+        self.logger.debug('Shutting down.')
+        super(self.__class__, self).shutdown(self)
+
+def run_registration_server(host='', port=int(config['registration_server_port'])):
     server_address = (host, port)
     server = SocketServer.TCPServer(server_address, RegistrationHandler)
 
@@ -78,3 +82,4 @@ def run_registration_handler(host='', port=8000):
 
     logger = logging.getLogger('registration_server')
     logger.debug('RegistrationHandler started on {0}'.format(server.server_address))
+    return server
