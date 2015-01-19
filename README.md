@@ -87,10 +87,11 @@
             ------ Required Fields ------
             "score":         Number,
             "assignment":    String,
-            "login":         String,
+            "repo":          String,    # name of graded repo (e.g. 'ds' or 'group24')
             "submit":        Boolean,   # switch to record grade in database (or not)
 
             ------ Optional Fields ------
+            "group_repo":    Boolean,   # whether or not submission to group repo
             "grader_login":  String,
             "comments":      String,
             "email_content": String,    # email to send student
