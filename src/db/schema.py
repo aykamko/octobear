@@ -15,8 +15,7 @@ def email_validator(value):
 
 def or_validator(*validator_list):
     def validator(obj):
-        # import pdb; pdb.set_trace()
-        return reduce(lambda v, w: v(obj) or w(obj), validator_list)
+        return any([validator(obj) for validator in validator_list])
     return validator
 
 def id_class_validator(_class):

@@ -13,9 +13,9 @@ def create_assignment(name, max_score, weight=None):
         raise Exception('Assignment {0} already exists!'.format(name))
     new = connection.Assignment()
     new['name'] = name
-    new['max_score'] = int(max_score)
+    new['max_score'] = float(max_score)
     if weight:
-        new['weight'] = int(weight)
+        new['weight'] = float(weight)
     new.save()
     return new
 
@@ -24,9 +24,7 @@ def delete_assignment(name):
     return assignment_coll.remove({'name': name})
 
 def confirm(func, *func_args, **kwargs):
-    prompt = kwargs.get('prompt')
-    if not prompt:
-        prompt = 'Confirm'
+    prompt = kwargs.get('prompt', 'Confirm')
 
     prompt_base = '%s [%s]|%s: '
     if kwargs.get('default_resp'):

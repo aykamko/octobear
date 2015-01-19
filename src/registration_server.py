@@ -37,16 +37,16 @@ def register_member(data):
         user[u'time_registered'] = datetime.datetime.now()
     except KeyError:
         raise RegistrationException('Invalid data; missing fields.')
-    free_account = assign_account()
+    free_account = account.assign_account()
     if free_account == None:
         raise RegistrationException('Ran out of free account forms')
 
-    user[u'account'] = free_account
+    user[u'login'] = free_account
     user.save()
     # user saved in db, so we can now email him and register his github repo
     emailer.send(user, '[{0}] Registered!'.format(config['course_name']), 'registered.html')
     github.createEverything(
-            user[u'account'],
+            user[u'login'],
             [user[u'github']],
             config['jenkins_hook']
             )

@@ -11,7 +11,7 @@ account_coll = connection[config['course_name']][Account.__collection__]
 def generate_account_list(num, minimum_length=2):
     accounts = []
     alph = string.lowercase
-    non_reserved = lambda account: account[0] not in ('t', 'r')
+    non_reserved = lambda account: account[0] not in ('t', 'r', 'l') # TRL
     for length in itertools.count(minimum_length):
         accounts.extend(map(''.join, filter(non_reserved, itertools.product(alph, repeat=length))))
         if len(accounts) >= num:

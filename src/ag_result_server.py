@@ -11,14 +11,16 @@ from . import config
 from db.schema import connection as conn, Assignment, Member, Grade
 import emailer
 
-
 from redis import Redis
 from rq import Queue
-
-
 work_queue = Queue(connection=Redis())
-grade_coll = conn[config['course_name']][Grade.__collection__]
+
 def handle_result(data):
+    """
+    Handles output from an autograder.
+    This function has the ability to record a score in the database, email
+    students their results, and log the raw output from the autograder.
+    """
     try:
         # required
         score           = float(data['score'])
@@ -42,40 +44,59 @@ def handle_result(data):
     owner = conn.Group.find_one({'name': repo}) if group_repo \
             else conn.Member.find_one({'login': repo})
     if not owner or not assignment:
-        logger.error('Assignment or owner do not exist; ignoring ag result.')
+        logger.error(
+                'Assignment or owner do not exist; ignoring ag result.\n{0}.'.format(
+                jprint.pformat(data)))
         return
 
     if submit:
-        grader = conn.Member.find_one({'login': grader_login});
-        result = grade_coll.update(
-                {'assignment': assignment['_id'], 'owner': owner['_id']},
-                {'$set': {
-                    'group': group_repo,
-                    'score': score,
-                    'grader': (None if not grader else grader['_id']),
-                    'comments': comments}
-                    },
-                upsert=True
-                )
-        if 'upserted' in result:
-            new_grade = conn.Grade.find_one({'_id': result['upserted']})
-            new_grade.save() # re-save grade to set up relations
+        submit_grade(assignment['_id'], owner['_id'], group_repo, score,
+                grader_login=grader_login, comments=comments)
 
-    if email_content and len(email_content):
-        to = []
+    if email_content:
+        recipients = []
         if group_repo:
-            to.append(owner['email'])
+            recipients.append(owner['email'])
         else:
-            to.extend([student['email'] for student in
+            recipients.extend([student['email'] for student in
                 conn.Member.find({'_id': {'$in': owner['members']}})])
-        subject = '[{0} Autograder] {1} Results'.format(config['course-name'], assignment['name'])
-        if email_plain:
-            emailer.send_plaintext(to, subject, email_content);
-        else:
-            emailer.send_markdown(to, subject, email_content);
+        email_results(recipients, assignment['name'], email_content)
 
-    if raw_output and len(raw_output):
+    if raw_output:
         logger.info(raw_output)
+
+def submit_grade(assignment_id, owner_id, group_repo, score,
+        grader_login=None, comments=None):
+    """
+    Submits grade into database.
+    """
+    grader = conn.Member.find_one({'login': grader_login}) if grader_login \
+            else None
+    result = grade_coll.update(
+            {'assignment': assignment_id, 'owner': owner_id},
+            {'$set': {
+                'group': group_repo,
+                'score': score,
+                'grader': (grader['_id'] if grader else None),
+                'comments': comments}
+                },
+            upsert=True
+            )
+    if 'upserted' in result:
+        new_grade = conn.Grade.find_one({'_id': result['upserted']})
+        new_grade.save() # re-save grade to set up relations
+
+grade_coll = conn[config['course_name']][Grade.__collection__]
+def email_results(recipients, assignment_name, email_content):
+    """
+    Emails autograder output to recipient students.
+    """
+    subject = '[{0} Autograder] {1} Results'.format(config['course-name'], assignment_name)
+    if email_plain:
+        emailer.send_plaintext(recipients, subject, email_content);
+    else:
+        emailer.send_markdown(recipients, subject, email_content);
+
 
 class AutograderResultHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
@@ -93,7 +114,6 @@ class AutograderResultHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             length = int(self.headers.getheader('content-length'))
             data = json.loads(self.rfile.read(length))
             self.logger.debug('Recieved autograder result: {0}'.format(data))
-            # TODO: stub for @Vaishaal
             work_queue.enqueue(handle_result,data)
             self.send_response(200)
         else:
