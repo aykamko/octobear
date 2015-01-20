@@ -6,7 +6,7 @@ import threading
 import logging
 logger = logging.getLogger('ag_result_server');
 
-from . import config
+from . import config, jprint
 
 from db.schema import connection as conn, Assignment, Member, Grade
 import emailer
@@ -14,6 +14,9 @@ import emailer
 from redis import Redis
 from rq import Queue
 work_queue = Queue(connection=Redis())
+
+class AutograderResultException(Exception):
+    pass
 
 def handle_result(data):
     """
@@ -35,19 +38,17 @@ def handle_result(data):
         email_plain     = bool(data.get('email_plain'))
         raw_output      = data.get('raw_output')
     except KeyError:
-        logger.error(
+        raise(
                 'Received invalid data; required fields are missing.\n{0}'.format(
                 jprint.pformat(data)));
-        return
 
     assignment = conn.Assignment.find_one({'name': assignment_name})
     owner = conn.Group.find_one({'name': repo}) if group_repo \
             else conn.Member.find_one({'login': repo})
     if not owner or not assignment:
-        logger.error(
+        raise AutograderResultException(
                 'Assignment or owner do not exist; ignoring ag result.\n{0}.'.format(
                 jprint.pformat(data)))
-        return
 
     if submit:
         submit_grade(assignment['_id'], owner['_id'], group_repo, score,
@@ -101,7 +102,6 @@ def email_results(recipients, assignment_name, email_content):
 class AutograderResultHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
     def __init__(self, request, client_address, server):
-        self.logger = logging.getLogger('AutograderResultHandler')
         BaseHTTPServer.BaseHTTPRequestHandler.__init__(self, request, client_address, server)
 
     def do_POST(self):
@@ -113,25 +113,30 @@ class AutograderResultHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         if ctype == 'application/json':
             length = int(self.headers.getheader('content-length'))
             data = json.loads(self.rfile.read(length))
-            self.logger.debug('Recieved autograder result: {0}'.format(data))
-            work_queue.enqueue(handle_result,data)
+            logger.debug('Recieved autograder result:\n{0}'.format(
+                jprint.pformat(data)))
+            work_queue.enqueue(handle_result, data)
             self.send_response(200)
         else:
-            self.logger.debug('Content type is not JSON; sending 403.')
+            logger.warn('Content type is not JSON; sending 403.')
             self.send_error(403, 'Content type must be JSON.')
 
+    def log_message(self, format, *args):
+        logger.info(format % args)
+
     def shutdown(self):
-        self.logger.debug('Shutting down.')
+        logger.info('Shutting down.')
         super(self.__class__, self).shutdown(self)
 
 def run_ag_result_server(host='', port=int(config['ag_result_server_port'])):
     server_address = (host, port)
     server = SocketServer.TCPServer(server_address, AutograderResultHandler)
+    server.request_queue_size = 50 # increase maximum simultaneous requests
 
     t = threading.Thread(target=server.serve_forever)
     t.setDaemon(True) # don't hang on exit
     t.start()
 
     logger = logging.getLogger('ag_result_server')
-    logger.debug('AutograderResultHandler started on {0}'.format(server.server_address))
+    logger.info('AutograderResultHandler started on {0}'.format(server.server_address))
     return server
