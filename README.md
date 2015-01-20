@@ -1,4 +1,4 @@
-# Git Infrastructure for Berkeley EECS
+# Octobear: A git Infrastructure for Berkeley EECS
 
 ### Initial Setup
 
@@ -91,11 +91,11 @@
             "submit":        Boolean,   # switch to record grade in database (or not)
 
             ------ Optional Fields ------
-            "group_repo":    Boolean,   # whether or not submission to group repo
+            "group_repo":    Boolean,   # whether or not submission is from group repo
             "grader_login":  String,
             "comments":      String,
             "email_content": String,    # email to send student
-            "email_plain":   Boolean,   # True => plaintext format, Default/False => Markdown format
+            "email_plain":   Boolean,   # True => plaintext, Default/False => Markdown
             "raw_output":    String     # raw output of autograder, for logging
           }
 
