@@ -19,6 +19,11 @@ from rq.worker import logger as rq_logger
 from . import log_level
 rq_logger.setLevel(log_level)
 
+from rq import Connection, Worker
+from rq.worker import logger as rq_logger
+from . import log_level
+rq_logger.setLevel(log_level)
+
 class TestUtils:
 
     def __init__(self, conn=None, logger_name=None, **kwargs):
