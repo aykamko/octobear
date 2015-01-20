@@ -48,11 +48,12 @@ def register_member(data):
     user[u'login'] = free_account[0]
     user.save()
     # user saved in db, so we can now email him and register his github repo
+    attachments = [free_account[1]] if config.get('no_account_forms') else []
     emailer.send_template(
             user['email'],
             '[{0}] Registered!'.format(config['course_name']),
             'registered.html',
-            files=[free_account[1]],
+            files=attachments,
             user=user)
     github.createEverything(
             user[u'login'],

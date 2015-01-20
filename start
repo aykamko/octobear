@@ -11,6 +11,11 @@ if __name__ == '__main__':
             dest='roster',
             required=False,
             help='Roster file to parse.')
+    parser.add_argument('--test-init',
+            dest='test_init',
+            required=False,
+            action='store_true',
+            help='Initialize accounts in database without real account forms.')
     parser.add_argument('--bulk-account-dir',
             dest='bulk_dir',
             required=False,
@@ -29,7 +34,11 @@ if __name__ == '__main__':
         print 'Enrolling from roster file: {0}'.format(roster_file)
         roster.parse_enroll(roster_file)
 
-    if args.bulk_dir:
+    if args.test_init:
+        print 'Registering 1000 dummy accounts.'
+        account.register_num_accounts(1000)
+
+    if not args.test_init and args.bulk_dir:
         print 'Splitting bulk pdfs...'
         bulk_dir = os.path.realpath(args.bulk_dir)
         bulk_acct_forms = [bulk_dir + ('/%s' % pdf) for pdf in os.listdir(bulk_dir)]
@@ -38,4 +47,4 @@ if __name__ == '__main__':
         print 'Done splitting!'
         account.register_num_accounts(num_accounts, minimum_length=args.min_len)
 
-    app.run()
+    app.run(no_account_forms=args.test_init)
