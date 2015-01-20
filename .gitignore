@@ -1,6 +1,5 @@
 # Ignore account forms
-src/account_forms
-student_acct_forms/
+/account-forms/
 
 # Ignore MongoDB
 data/

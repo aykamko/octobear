@@ -16,10 +16,6 @@ if __name__ == '__main__':
             required=False,
             action='store_true',
             help='Initialize accounts in database without real account forms.')
-    parser.add_argument('--bulk-account-dir',
-            dest='bulk_dir',
-            required=False,
-            help='Path of directory containing bulk student account pdfs.')
     parser.add_argument('--min-login-len',
             type=int,
             dest='min_len',

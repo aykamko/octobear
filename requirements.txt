@@ -4,4 +4,3 @@ Jinja2==2.7.3
 rq>=0.4.6
 redis>=2.6.0
 markdown2==2.3.0
-PyPDF2==1.24
