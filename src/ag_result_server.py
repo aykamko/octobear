@@ -38,7 +38,7 @@ def handle_result(data):
         email_plain     = bool(data.get('email_plain'))
         raw_output      = data.get('raw_output')
     except KeyError:
-        raise(
+        raise AutograderResultException(
                 'Received invalid data; required fields are missing.\n{0}'.format(
                 jprint.pformat(data)));
 
