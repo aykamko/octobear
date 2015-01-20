@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+# Try not to import anything that's dependent on this file's location, since
+# it should be able to be run independently without any other python files.
 import argparse
 import subprocess
 import os
@@ -11,7 +13,10 @@ class IdentifyAccountForms(object):
     strings = ["strings"]
 
     # A fast trigger word
-    keyword = "cs162"
+    raise Exception(
+                'REPLACE THIS LINE WITH SOMETHING LIKE: keyword = "cs162"')
+    keyword = "YOUR CLASS NAME HERE"
+
     # A slower regular expression, with a 'login' capture group
     login_expression = re.compile(keyword + r"-(?P<login>[a-z]+)@imail\.eecs")
 
