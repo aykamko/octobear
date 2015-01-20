@@ -38,11 +38,13 @@ def register_member(data):
         user[u'time_registered'] = datetime.datetime.now()
     except KeyError:
         raise RegistrationException('Invalid data; missing fields.')
-    free_account = account.assign_account()
-    if free_account == None:
-        raise RegistrationException('Ran out of free account forms')
 
-    user[u'login'] = free_account
+    try:
+        free_account = account.assign_account()
+    except Exception as e:
+        raise RegistrationException(e.message)
+
+    user[u'login'] = free_account[0]
     user.save()
     # user saved in db, so we can now email him and register his github repo
     emailer.send(user, '[{0}] Registered!'.format(config['course_name']), 'registered.html')

@@ -12,7 +12,7 @@ from src import config
 testdb = config['course_name']
 
 from src.db.schema import *
-from src.account import generate_account_list
+from src.account import generate_login_list
 
 from rq import Connection, Worker
 from rq.worker import logger as rq_logger
@@ -48,7 +48,7 @@ class TestUtils:
 
     def generate_students(self, num, bulk=False):
         students = []
-        logins = generate_account_list(num)
+        logins = generate_login_list(num)
         students_coll = self.conn[testdb][Member.__collection__]
         if bulk:
             bulk_op = students_coll.initialize_unordered_bulk_op()

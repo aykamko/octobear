@@ -1,3 +1,41 @@
-#!/bin/bash
-python run.py &
-python -m src.162Worker.py
+#!/usr/bin/env python
+import os
+import argparse
+from src import app, roster, account
+
+if __name__ == '__main__':
+    print 'Starting...'
+    parser = argparse.ArgumentParser(
+            description='Run deamons for git infrastructure.')
+    parser.add_argument('--roster',
+            dest='roster',
+            required=False,
+            help='Roster file to parse.')
+    parser.add_argument('--bulk-account-dir',
+            dest='bulk_dir',
+            required=False,
+            help='Path of directory containing bulk student account pdfs.')
+    parser.add_argument('--min-login-len',
+            type=int,
+            dest='min_len',
+            required=False,
+            default=2,
+            help='Minimum length of student logins. (i.e. "aa" = 2, "aaa" = 3)')
+
+    args = parser.parse_args()
+
+    if args.roster:
+        roster_file = args.roster[0]
+        print 'Enrolling from roster file: {0}'.format(roster_file)
+        roster.parse_enroll(roster_file)
+
+    if args.bulk_dir:
+        print 'Splitting bulk pdfs...'
+        bulk_dir = os.path.realpath(args.bulk_dir)
+        bulk_acct_forms = [bulk_dir + ('/%s' % pdf) for pdf in os.listdir(bulk_dir)]
+        bulk_acct_forms.sort()
+        num_accounts = account.split_store_account_forms(bulk_acct_forms, minimum_length=args.min_len)
+        print 'Done splitting!'
+        account.register_num_accounts(num_accounts)
+
+    app.run()

@@ -80,14 +80,14 @@ class Account(Document):
     __collection__ = 'accounts'
     __database__ = config['course_name']
     structure = {
-        'account': basestring,
+        'login': basestring,
         'assigned': bool
     }
-    required_fields = ['account', 'assigned']
+    required_fields = ['login', 'assigned']
     default_values = {'assigned': False}
     indexes = [
         {
-            'fields': 'account',
+            'fields': 'login',
             'unique': True,
             'ttl': 0
         }

@@ -1,3 +1,7 @@
+# Ignore account forms
+src/account_forms
+student_acct_forms/
+
 # Ignore MongoDB
 data/
 
