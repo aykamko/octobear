@@ -136,7 +136,7 @@
     make a directory to contain your work, since this process creates a lot of
     files, and you will want to contain them. Then, grab a copy of
     [Apache PDFBox](https://pdfbox.apache.org/download.cgi) and save it as
-    `pdfbox.jar` in your working directory. Copy the identify-account-forms
+    `pdfbox.jar` in your working directory. Copy the identify_account_forms
     script into your working directory, as well as your `cs162.class-*.pdf` files.
 
     The process can be summarized like:
@@ -145,24 +145,24 @@
     mkdir work/
     cd work/
     wget -o pdfbox.jar "http://apache.cs.utah.edu/pdfbox/1.8.8/pdfbox-app-1.8.8.jar"
-    cp ../identify-account-forms identify-account-forms
+    cp ../identify_account_forms identify_account_forms
     cp ~/Downloads/cs162.class-*.pdf ./
     ```
 
     Then, you should split up your account forms:
 
     ```
-    ./identify-account-forms split cs162.class-*.pdf
+    ./identify_account_forms split cs162.class-*.pdf
     ```
 
     The new files will be named in the form of `cs162.class-1-123.pdf`, where
     123 is the zero-indexed page number. You should test the identification code
     on a few of these PDFs, just to make sure it works. (You will probably need
     to edit the `keyword` variable that is used to look for account logins, inside
-    the identify-account-forms script.)
+    the identify_account_forms script.)
 
     ```
-    ./identify-account-forms identify cs162.class-1-*.pdf
+    ./identify_account_forms identify cs162.class-1-*.pdf
     ```
 
     Once you're satisfied with the identification accuracy, perform the rename
@@ -170,19 +170,19 @@
     files into filenames such as `aa.pdf`.
 
     ```
-    ./identify-account-forms rename cs162.class-1-*.pdf
-    ./identify-account-forms rename cs162.class-2-*.pdf
+    ./identify_account_forms rename cs162.class-1-*.pdf
+    ./identify_account_forms rename cs162.class-2-*.pdf
     
     ... ETC ...
     ```
 
-    Finally, the system expects account-forms to live in the `account-forms/`
+    Finally, the system expects account forms to live in the `account_forms/`
     directory in the root of the web application. Move your account forms there,
     and wipe your work directory.
 
     Once your account forms are in place, you should start the web application
     with the `--account-init` option, which tells the application to list the
-    PDFs in `account-forms/` and add each account name to the list of available
+    PDFs in `account_forms/` and add each account name to the list of available
     accounts. The application will remove the `.pdf` extension and use the file
     name as the login.
 

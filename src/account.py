@@ -8,7 +8,7 @@ from . import config
 
 logger = logging.getLogger('Account')
 account_coll = connection[config['course_name']][Account.__collection__]
-account_forms_directory = os.path.join(dirname(dirname(__file__)), "account-forms")
+account_forms_directory = os.path.join(dirname(dirname(__file__)), "account_forms")
 
 def generate_login_list(num, minimum_length=2):
     """Generates a dummy account list (FOR TESTING ONLY)"""
@@ -35,7 +35,7 @@ def register_logins():
             if file_name.endswith(".pdf")]
 
     # Sanity check
-    login_matcher = re.compile(r"[a-z]{2,3}")
+    login_matcher = re.compile(r"^[a-z]{2,3}$")
     for login in logins:
         if login_matcher.search(login) is None:
             raise RuntimeError(

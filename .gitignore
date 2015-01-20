@@ -1,5 +1,5 @@
 # Ignore account forms
-/account-forms/
+/account_forms/
 
 # Ignore MongoDB
 data/

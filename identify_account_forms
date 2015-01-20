@@ -32,28 +32,31 @@ class IdentifyAccountForms(object):
         return process
 
     def split_pdfs(self, pdfs):
-        map(self.split_pdf, pdfs)
+        map(self.split_single_pdf, pdfs)
 
-    def split_pdf(self, pdf):
-        self.start_process(self.pdfbox + ["PDFSplit", pdf])
+    def split_single_pdf(self, pdf):
+        process = self.start_process(self.pdfbox + ["PDFSplit", pdf])
+        process.wait()
 
     def rename_pdfs(self, pdfs):
-        map(self.rename_pdf, pdfs)
+        map(self.rename_single_pdf, pdfs)
 
-    def rename_pdf(self, pdf):
-        identity = self.identify_pdf(pdf)
+    def rename_single_pdf(self, pdf):
+        identity = self.identify_single_pdf(pdf)
         source_path = os.path.abspath(pdf)
         target_path = os.path.join(os.path.dirname(source_path), "%s.pdf" % identity)
         os.rename(source_path, target_path)
 
     def identify_pdfs(self, pdfs):
         for pdf in pdfs:
-            print pdf, self.identify_pdf(pdf)
+            print pdf, self.identify_single_pdf(pdf)
 
-    def identify_pdf(self, pdf):
+    def identify_single_pdf(self, pdf):
         process = self.start_process(self.strings + [pdf], collect_output=True)
         while True:
             line = process.stdout.readline()
+            if line == '':
+                break
             if self.keyword in line:
                 match = self.login_expression.search(line)
                 if match:
