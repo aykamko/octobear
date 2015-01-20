@@ -29,7 +29,7 @@ def register():
             print 'Successfully registered!'
             return redirect(url_for('success'))
         else:
-            flash('Missing fields.')
+            flash('Missing or invalid fields.')
             return redirect(url_for('register'))
     return render_template('form.html', form=form)
 

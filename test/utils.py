@@ -5,13 +5,24 @@ import re
 import subprocess
 import os
 import signal
+import logging
 from inspect import stack
 
 from src import config
 testdb = config['course_name']
 
 from src.db.schema import *
-from src.account import generate_account_list
+from src.account import generate_login_list
+
+from rq import Connection, Worker
+from rq.worker import logger as rq_logger
+from . import log_level
+rq_logger.setLevel(log_level)
+
+from rq import Connection, Worker
+from rq.worker import logger as rq_logger
+from . import log_level
+rq_logger.setLevel(log_level)
 
 class TestUtils:
 
@@ -35,9 +46,14 @@ class TestUtils:
         self.conn.drop_database(testdb)
         self.logger.info('Test complete! No other output indicates success.')
 
+    def start_rq_worker(self, queue, burst=True):
+        with Connection():
+            worker = Worker([queue])
+            worker.work(burst=True)
+
     def generate_students(self, num, bulk=False):
         students = []
-        logins = generate_account_list(num)
+        logins = generate_login_list(num)
         students_coll = self.conn[testdb][Member.__collection__]
         if bulk:
             bulk_op = students_coll.initialize_unordered_bulk_op()
@@ -54,6 +70,7 @@ class TestUtils:
             students.append(s)
         if bulk:
             bulk.execute()
+        assert (self.conn[testdb].command('collstats', Member.__collection__)['count'] == num)
         return students
 
     def generate_groups(self, num, students, students_per_group, bulk=False):
@@ -85,6 +102,7 @@ class TestUtils:
                 break
         if bulk:
             bulk.execute()
+        assert (self.conn[testdb].command('collstats', Group.__collection__)['count'] == num)
         return groups
 
     def generate_assignments(self, num, bulk=False):
@@ -103,4 +121,5 @@ class TestUtils:
             assignments.append(a)
         if bulk:
             bulk.execute()
+        assert (self.conn[testdb].command('collstats', Assignment.__collection__)['count'] == num)
         return assignments

@@ -28,3 +28,9 @@ import logging
 logging.basicConfig(level=int(config['log_level']),
                     format='%(name)s: %(message)s'
                     )
+
+###############################################################################
+# PrettyPrinter
+###############################################################################
+import pprint
+jprint = pprint.PrettyPrinter(indent=2, width=1)

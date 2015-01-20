@@ -7,4 +7,7 @@ from src import config
 testdb = config['course_name'] = 'test-' + config['course_name']
 
 import logging
-logging.basicConfig(format='%(name)s: %(message)s')
+log_level = logging.WARN
+logging.basicConfig(
+        level=log_level,
+        format='%(name)s: %(message)s')

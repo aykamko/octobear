@@ -4,6 +4,7 @@ import requests
 import logging
 import re
 from requests import get as GET, post as POST, delete as DELETE, put as PUT
+from .. import config
 
 class GitHubApiError(Exception):
     pass
@@ -53,8 +54,8 @@ class GitHub:
 
     # Usernames are untrusted user input, so check 'em
     def checkUsername(self, username):
-        if type(username) is not str or \
-                re.match(r"^[a-zA-Z0-9][a-zA-Z0-9-]*$", username) is None:
+        if not isinstance(username, basestring) or \
+                re.match(r"[a-zA-Z0-9][a-zA-Z0-9\-]*$", username) is None:
             raise GitHubApiError("Invalid GitHub username: %s" % (username))
 
     def getTeamIDsByName(self):
@@ -192,3 +193,4 @@ class GitHub:
 
 # disable logging for requests module
 logging.getLogger('requests').setLevel(logging.WARNING)
+github = GitHub(config['gh_organization'], config['gh_user'], config['gh_pass'])

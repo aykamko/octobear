@@ -1,21 +1,24 @@
 import smtplib
 import markdown2
+import os
 
+from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from jinja2 import Environment, PackageLoader
 from . import config
 
 # Creates and emails a text/plain message
-def send_plaintext(to_address, subject, plaintext):
+def send_plaintext(to_address, subject, plaintext, files=[]):
     msg = MIMEText(plaintext)
     msg['Subject'] = subject
     msg['From'] = config['email_from']
     msg['To'] = to_address
+    attach_files(msg, files)
     _send(msg)
 
 # Creates and emails an HTML message, with a backup plaintext message
-def send_html(to_address, subject, html_string):
+def send_html(to_address, subject, html_string, files=[]):
     msg = MIMEMultipart('alternative')
     msg['Subject'] = subject
     msg['From'] = config['email_from']
@@ -33,21 +36,30 @@ def send_html(to_address, subject, html_string):
     # the HTML message, is best and preferred.
     msg.attach(part1)
     msg.attach(part2)
-
+    attach_files(msg, files)
     _send(msg)
 
 # Renders the specified template to HTML, then emails it
-def send_template(to_address, subject, template_name, **kwargs):
+def send_template(to_address, subject, template_name, files=None, **kwargs):
     env = Environment(loader=PackageLoader('src'))
     template = env.get_template(template_name)
     html = template.render(kwargs)
 
-    send_html(to_address, subject, html)
+    send_html(to_address, subject, html, files)
 
 # Renders the given markdown to HTML, then emails it
-def send_markdown(to_address, subject, markdown):
+def send_markdown(to_address, subject, markdown, files=None):
     html = markdown2.markdown(markdown, safe_mode='escape')
-    send_html(to_address, subject, html)
+    send_html(to_address, subject, html, files)
+
+def attach_files(msg, files):
+    for f in files:
+        with open(f, 'rb') as fil:
+            filename = os.path.basename(fil.name)
+            attachment = MIMEApplication(fil.read(), _subtype=os.path.splitext(filename)[1][1:])
+            attachment.add_header('content-disposition', 'attachment',
+                    filename=('utf-8', '', filename))
+            msg.attach(attachment)
 
 # Authenticates, then actually sends the message
 def _send(msg):
