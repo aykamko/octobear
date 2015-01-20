@@ -12,6 +12,7 @@ from . import config
 import account
 
 from db.schema import connection
+from github.github import github
 
 from redis import Redis
 from rq import Queue
@@ -47,7 +48,12 @@ def register_member(data):
     user[u'login'] = free_account[0]
     user.save()
     # user saved in db, so we can now email him and register his github repo
-    emailer.send(user, '[{0}] Registered!'.format(config['course_name']), 'registered.html')
+    emailer.send_template(
+            user['email'],
+            '[{0}] Registered!'.format(config['course_name']),
+            'registered.html',
+            files=[free_account[1]],
+            user=user)
     github.createEverything(
             user[u'login'],
             [user[u'github']],
@@ -64,7 +70,7 @@ class RegistrationHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             length = int(self.headers.getheader('content-length'))
             data = json.loads(self.rfile.read(length))
             logger.debug('Recieved registration: {0}'.format(data))
-            work_queue.enqueue(register_member,data)
+            work_queue.enqueue(register_member, data)
             self.send_response(200)
         else:
             logger.warn('Content type is not JSON; sending 403.')

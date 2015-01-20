@@ -36,6 +36,6 @@ if __name__ == '__main__':
         bulk_acct_forms.sort()
         num_accounts = account.split_store_account_forms(bulk_acct_forms, minimum_length=args.min_len)
         print 'Done splitting!'
-        account.register_num_accounts(num_accounts)
+        account.register_num_accounts(num_accounts, minimum_length=args.min_len)
 
     app.run()

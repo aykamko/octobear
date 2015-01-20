@@ -43,9 +43,9 @@ def generate_login_list(num, minimum_length=2):
         if len(accounts) >= num:
             return accounts[:num]
 
-def register_num_accounts(num):
+def register_num_accounts(num, minimum_length=2):
     bulk = account_coll.initialize_ordered_bulk_op()
-    for account_str in generate_login_list(num):
+    for account_str in generate_login_list(num, minimum_length=minimum_length):
         account = connection.Account()
         account['login'] = account_str
         bulk.insert(dict(account))
@@ -63,4 +63,4 @@ def assign_account():
         raise Exception('Ran out of free account forms!')
     login = free['login']
     logger.debug('Registered account: {0}'.format(login))
-    return (login, split_accounts_dir + ('/%s' % (login)))
+    return (login, split_accounts_dir + ('/%s.pdf' % (login)))

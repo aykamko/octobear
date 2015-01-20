@@ -8,8 +8,8 @@ gh_pass = ***REMOVED***
 registration_server_port = 8000
 ag_result_server_port = 9001
 
-# logging levels based on python logging module
-log_level = 10
+# jenkins
+jenkins_hook = http://alekskamko.com
 
 # email settings
 email_from = cs61b@imail.eecs.berkeley.edu
@@ -17,3 +17,7 @@ email_username = postmaster@sandboxe9b32d5651b3403c820ae7c5d2cd3926.mailgun.org
 email_password = e581750b7b1dfe506b85398c747c6fc6
 smtp_host = smtp.mailgun.org
 smtp_port = 587
+
+# logging levels based on python logging module
+log_level = 10
+
