@@ -6,6 +6,11 @@ git-infra/
 
 # Created by https://www.gitignore.io
 
+### Redis ###
+# Ignore redis binary dump (dump.rdb) files
+
+*.rdb
+
 ### vim ###
 [._]*.s[a-w][a-z]
 [._]s[a-w][a-z]

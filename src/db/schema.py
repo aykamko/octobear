@@ -51,6 +51,13 @@ class Member(Document):
     }
     required_fields = ['sid', 'role', 'registered']
     default_values = {'role': 0, 'registered': False}
+    indexes = [
+        {
+            'fields': 'sid',
+            'unique': True,
+            'ttl': 0
+        }
+    ]
 
 class Group(Document):
     __collection__ = 'groups'
@@ -61,6 +68,13 @@ class Group(Document):
         'grades': Set(ObjectId) # Grade
     }
     required_fields = ['name']
+    indexes = [
+        {
+            'fields': 'name',
+            'unique': True,
+            'ttl': 0
+        }
+    ]
 
 class Account(Document):
     __collection__ = 'accounts'
@@ -71,6 +85,13 @@ class Account(Document):
     }
     required_fields = ['account', 'assigned']
     default_values = {'assigned': False}
+    indexes = [
+        {
+            'fields': 'account',
+            'unique': True,
+            'ttl': 0
+        }
+    ]
 
 class Assignment(Document):
     __collection__ = 'assignments'
@@ -81,6 +102,13 @@ class Assignment(Document):
         'weight': float
     }
     required_fields = ['name', 'max_score']
+    indexes = [
+        {
+            'fields': 'name',
+            'unique': True,
+            'ttl': 0
+        }
+    ]
 
 class Grade(Document):
     __collection__ = 'grades'
@@ -94,6 +122,13 @@ class Grade(Document):
         'comments': basestring
     }
     required_fields = ['assignment', 'owner']
+    indexes = [
+        {
+            'fields': ['assignment', 'owner'],
+            'unique': True,
+            'ttl': 0
+        }
+    ]
 
     def add_grade_to_student(self, student_id):
         student = connection.Member.find_one({'_id': student_id})
