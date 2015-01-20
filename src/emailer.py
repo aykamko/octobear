@@ -9,7 +9,7 @@ from jinja2 import Environment, PackageLoader
 from . import config
 
 # Creates and emails a text/plain message
-def send_plaintext(to_address, subject, plaintext, files=None):
+def send_plaintext(to_address, subject, plaintext, files=[]):
     msg = MIMEText(plaintext)
     msg['Subject'] = subject
     msg['From'] = config['email_from']
@@ -18,7 +18,7 @@ def send_plaintext(to_address, subject, plaintext, files=None):
     _send(msg)
 
 # Creates and emails an HTML message, with a backup plaintext message
-def send_html(to_address, subject, html_string, files=None):
+def send_html(to_address, subject, html_string, files=[]):
     msg = MIMEMultipart('alternative')
     msg['Subject'] = subject
     msg['From'] = config['email_from']
@@ -53,7 +53,7 @@ def send_markdown(to_address, subject, markdown, files=None):
     send_html(to_address, subject, html, files)
 
 def attach_files(msg, files):
-    for f in files or []:
+    for f in files:
         with open(f, 'rb') as fil:
             filename = os.path.basename(fil.name)
             attachment = MIMEApplication(fil.read(), _subtype=os.path.splitext(filename)[1][1:])

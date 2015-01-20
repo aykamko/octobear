@@ -6,9 +6,6 @@ from rq import Queue, Connection, Worker
 
 
 def start():
-    # Preload github
-    from github.github import GitHub
-
     def work():
         with Connection():
             w = Worker([Queue()])
