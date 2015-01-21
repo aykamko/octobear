@@ -32,12 +32,7 @@ def send_markdown(to_address, subject, markdown, files=[]):
 
 # Creates and emails an HTML/plaintext mixed message
 def send_mixed(to_address, subject, plaintext=None, html=None, files=[]):
-
     msg = MIMEMultipart('alternative')
-    msg['Subject'] = subject
-    msg['From'] = config['email_from']
-    msg['To'] = to_address
-    msg['Message-Id'] = make_msgid()
 
     if plaintext:
         part1 = MIMEText(plaintext, 'plain')
@@ -47,9 +42,15 @@ def send_mixed(to_address, subject, plaintext=None, html=None, files=[]):
         part2 = MIMEText(html, 'html')
         msg.attach(part2)
 
-    attach_files(msg, files)
-
-    _send(msg)
+    # See http://stackoverflow.com/a/17115349/1222351 for MIME structure
+    outer = MIMEMultipart('mixed')
+    outer['Subject'] = subject
+    outer['From'] = config['email_from']
+    outer['To'] = to_address
+    outer['Message-Id'] = make_msgid()
+    outer.attach(msg)
+    attach_files(outer, files)
+    _send(outer)
 
 def attach_files(msg, files):
     for f in files:
