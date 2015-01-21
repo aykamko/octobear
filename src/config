@@ -12,8 +12,8 @@ jenkins_hook = http://alekskamko.com
 
 # email settings
 email_from = cs61b@imail.eecs.berkeley.edu
-email_username = postmaster@sandboxe9b32d5651b3403c820ae7c5d2cd3926.mailgun.org
-email_password = e581750b7b1dfe506b85398c747c6fc6
+email_username = postmaster@mg.flow.moe
+email_password = ***REMOVED***
 smtp_host = smtp.mailgun.org
 smtp_port = 587
 
