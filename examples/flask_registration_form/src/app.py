@@ -35,4 +35,4 @@ def register():
 
 @app.route('/success')
 def success():
-    return 'Successfully registered! See terminal for output.'
+    return render_template('success.html')
