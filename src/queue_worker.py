@@ -1,9 +1,16 @@
 #!/usr/bin/env python
-from . import config
+from . import config, logdir
+import logging
 import sys
 from multiprocessing import Process
 from rq import Queue, Connection, Worker
+from rq.worker import logger
 
+rqLoggerFileHandler = logging.FileHandler(logdir + "/worker.log")
+rqLoggerFileHandler.setFormatter(logging.Formatter(
+    fmt='%(asctime)s %(message)s',
+    datefmt='%H:%M:%S'))
+logger.addHandler(rqLoggerFileHandler)
 
 def start():
     def work():

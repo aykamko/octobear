@@ -1,7 +1,8 @@
 ###############################################################################
 # Parse config
 ###############################################################################
-import os, re
+import os
+import re
 ignore_line = re.compile('\s*(#.*|\s*$)')
 config_line = re.compile('\s*(\w+)\s*=\s*(.+)')
 
@@ -25,9 +26,26 @@ config = parse_config(open(os.path.dirname(__file__) + '/config', 'r'))
 # Logging
 ###############################################################################
 import logging
-logging.basicConfig(level=int(config['log_level']),
-                    format='%(name)s: %(message)s'
-                    )
+import sys
+
+logdir = config['log_dir']
+logfile = logdir + "/octobear.log"
+try:
+    os.mkdir(os.path.dirname(logfile))
+except OSError:
+    pass
+
+rootlogger = logging.getLogger()
+rootlogger.setLevel(int(config['log_level']))
+logFormatter = logging.Formatter('%(name)s: %(message)s')
+
+fileHandler = logging.FileHandler(logfile)
+fileHandler.setFormatter(logFormatter)
+rootlogger.addHandler(fileHandler)
+
+consoleHandler = logging.StreamHandler(sys.stdout)
+consoleHandler.setFormatter(logFormatter)
+rootlogger.addHandler(consoleHandler)
 
 ###############################################################################
 # PrettyPrinter
