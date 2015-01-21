@@ -3,6 +3,7 @@ import re
 import logging
 import os
 import itertools
+import pymongo
 from os.path import dirname
 from db.schema import connection, Account
 from . import config
@@ -31,9 +32,9 @@ def register_num_accounts(num, minimum_length=2):
     return bulk.execute()
 
 def register_logins():
-    logins = [file_name[:-len(".pdf")]
+    logins = sorted([file_name[:-len(".pdf")]
             for file_name in os.listdir(account_forms_directory)
-            if file_name.endswith(".pdf")]
+            if file_name.endswith(".pdf")])
 
     # Sanity check
     login_matcher = re.compile(r"^[a-z]{2,3}$")
@@ -54,11 +55,12 @@ def assign_account():
     Returns a tuple of (login_str, path_to_account_form).
     """
     free = account_coll.find_and_modify(
-            {'assigned': False},
-            {'$set': {'assigned': True}},
+            query={'assigned': False},
+            update={'$set': {'assigned': True}},
+            sort=[('login', pymongo.ASCENDING)],
             new=True)
     if not free:
         raise Exception('Ran out of free account forms!')
     login = free['login']
     logger.debug('Registered account: {0}'.format(login))
-    return (login, os.path.join(account_forms_directory,  "%s.pdf" % login))
+    return (login, os.path.join(account_forms_directory, "%s.pdf" % login))

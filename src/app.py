@@ -8,8 +8,12 @@ from .queue_worker import start as start_queue_worker
 
 def run(no_account_forms=False):
     config['no_account_forms'] = bool(no_account_forms)
-    rserver = run_registration_server(port=int(config['registration_server_port']))
-    agserver = run_ag_result_server(port=int(config['ag_result_server_port']))
+    rserver = run_registration_server(
+            host=config['registration_server_host'],
+            port=int(config['registration_server_port']))
+    agserver = run_ag_result_server(
+            host=config['ag_result_server_host'],
+            port=int(config['ag_result_server_port']))
     start_queue_worker()
 
     def SIGINT_handler(signal, frame):

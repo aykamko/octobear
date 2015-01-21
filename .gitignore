@@ -1,5 +1,8 @@
+# Ignore logs
+**/log
+
 # Ignore account forms
-/account_forms/
+**/account_forms/
 
 # Ignore MongoDB
 data/

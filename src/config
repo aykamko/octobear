@@ -4,7 +4,9 @@ gh_organization = Berkeley-CS61B
 gh_user = BearBot-61B
 gh_pass = ***REMOVED***
 
+registration_server_host = localhost
 registration_server_port = 8000
+ag_result_server_host = localhost
 ag_result_server_port = 9001
 
 # jenkins
@@ -19,4 +21,4 @@ smtp_port = 587
 
 # logging levels based on python logging module
 log_level = 10
-
+log_dir = /var/local/home/cs61b/octobear/log

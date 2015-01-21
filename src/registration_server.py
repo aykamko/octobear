@@ -7,7 +7,7 @@ import datetime
 import logging
 logger = logging.getLogger(__name__)
 
-from . import config
+from . import config, jprint
 
 import account
 
@@ -24,7 +24,7 @@ work_queue = Queue(connection=Redis())
 class RegistrationException(Exception):
     pass
 
-def register_member(data):
+def validate_registration_data(data):
     try:
         sid = int(data['sid'])
         user = connection.Member.find_one({'sid': sid})
@@ -39,6 +39,13 @@ def register_member(data):
         user[u'time_registered'] = datetime.datetime.now()
     except KeyError:
         raise RegistrationException('Invalid data; missing fields.')
+    return user
+
+def register_member((sid, user_data)):
+    # TODO: hack, but i can't pass the user object to the queue otherwise
+    user = connection.Member.find_one({'sid': sid})
+    for k, v in user_data.iteritems():
+        user[k] = v
 
     try:
         free_account = account.assign_account()
@@ -48,7 +55,7 @@ def register_member(data):
     user[u'login'] = free_account[0]
     user.save()
     # user saved in db, so we can now email him and register his github repo
-    attachments = [free_account[1]] if config.get('no_account_forms') else []
+    attachments = [] if config.get('no_account_forms') else [free_account[1]]
     emailer.send_template(
             user['email'],
             '[{0}] Registered!'.format(config['course_name']),
@@ -70,9 +77,18 @@ class RegistrationHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         if ctype == 'application/json':
             length = int(self.headers.getheader('content-length'))
             data = json.loads(self.rfile.read(length))
-            logger.debug('Recieved registration: {0}'.format(data))
-            work_queue.enqueue(register_member, data)
+            logger.debug('Recieved registration:\n{0}'.format(
+                jprint.pformat(data)))
+            try:
+                user = validate_registration_data(data)
+            except RegistrationException as e:
+                self.send_error(403, e.message)
+                return
             self.send_response(200)
+            # TODO: hack, but i can't pass the user object to the queue otherwise
+            sid = user['sid']
+            del user['sid']
+            work_queue.enqueue(register_member, (sid, dict(user)))
         else:
             logger.warn('Content type is not JSON; sending 403.')
             self.send_error(403, 'Content type must be JSON.')
