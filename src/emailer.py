@@ -72,22 +72,28 @@ def _send(msg):
 # Testing
 if __name__ == "__main__":
     send_plaintext(
-        'akrolsmir@gmail.com',
+        'bearbot.61b@gmail.com',
         '[cs61b] Plaintext!',
         'This is the plaintext version. Can you see this?')
+    print "Sent plaintext."
 
     send_html(
-        'akrolsmir@gmail.com',
+        'bearbot.61b@gmail.com',
         '[cs61b] HTML?',
         '<b>This is the html version</b>. Can you see this?')
+    print "Sent HTML."
 
     send_template(
-        'akrolsmir@gmail.com',
+        'bearbot.61b@gmail.com',
         '[cs61b] Template.',
         'registered.html',
-        user={'email': 'akrolsmir@gmail.com', 'github': 'rimslorka'})
+        files=['account_forms/test.pdf'],
+        user={'email': 'bearbot.61b@gmail.com', 'github': 'rimslorka'})
+    print "Sent template."
 
     send_markdown(
-        'akrolsmir@gmail.com',
+        'bearbot.61b@gmail.com',
         '[cs61b] Markdown!',
-        '*This is the html version*. <b>Were the gats escaped?</b>')
+        '*This is the html version*. <b>Were the gats escaped?</b>',
+        ['LICENSE', 'README.md'])
+    print "Sent Markdown."
