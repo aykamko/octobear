@@ -41,7 +41,12 @@
     This will create a new databse in data/db and start a MongoDB instance. This
     needs to run perpetually in the background as a deamon.
 
-4. Run the git infra.
+4. [Install Redis](http://redis.io/download), then start a server.
+
+        $ brew install redis        # Homebrew on OSX
+        $ redis-server /usr/local/etc/redis.conf
+
+5. Run the git infra.
 
     If this is your first time, you have a few options. If you don't have any
     account forms, you can run the infra with spoof accounts like so:
