@@ -1,24 +1,32 @@
 <html>
+<head>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='css/form.css') }}" />
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600" rel="stylesheet" type="text/css">
+</head>
 <body>
-  <form method="POST" action="/">
-    <ul style='list-style: none'>
-      {{ form.hidden_tag() }}
-      {% for field in form %}
-        {% if field.name != 'csrf_token' %}
-        <li>{{ field }} {{ field.label }}</li>
-        {% endif %}
-      {% endfor %}
-      <input type="submit" value="Submit">
-    </ul>
-  </form>
-  {% with messages = get_flashed_messages() %}
-    {% if messages %}
-      <ul>
-      {% for m in messages %} 
-        <li>{{ m }}</li>
-      {% endfor %} 
+  <div id="register-form">
+    <form method="POST" action="/">
+      <div class="title">Class Registration</div>
+      <div class="instructions">Please use your @berkeley.edu email address.</div>
+      <ul style='list-style: none'>
+        {{ form.hidden_tag() }}
+        {% for field in form %}
+          {% if field.name != 'csrf_token' %}
+          <li>{{ field }} {{ field.label }}</li>
+          {% endif %}
+        {% endfor %}
+        <input type="submit" value="Submit">
       </ul>
-    {% endif %}
-  {% endwith %}
+    </form>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul>
+        {% for m in messages %} 
+          <li>{{ m }}</li>
+        {% endfor %} 
+        </ul>
+      {% endif %}
+    {% endwith %}
+  </div>
 </body>
 </html>
