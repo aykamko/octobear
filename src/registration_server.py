@@ -78,7 +78,7 @@ class RegistrationHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             length = int(self.headers.getheader('content-length'))
             data = json.loads(self.rfile.read(length))
             logger.debug('Recieved registration:\n{0}'.format(
-                jprint.pprint(data)))
+                jprint.pformat(data)))
             try:
                 user = validate_registration_data(data)
             except RegistrationException as e:
