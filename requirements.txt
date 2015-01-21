@@ -4,3 +4,4 @@ Jinja2==2.7.3
 rq>=0.4.6
 redis>=2.6.0
 markdown2==2.3.0
+requests==2.5.1

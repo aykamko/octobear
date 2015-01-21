@@ -2,6 +2,7 @@ import string
 import re
 import logging
 import os
+import itertools
 from os.path import dirname
 from db.schema import connection, Account
 from . import config
