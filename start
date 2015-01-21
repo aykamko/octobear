@@ -31,7 +31,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.roster:
-        roster_file = args.roster[0]
+        roster_file = args.roster
         print 'Enrolling from roster file: {0}'.format(roster_file)
         roster.parse_enroll(roster_file)
 

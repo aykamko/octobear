@@ -5,25 +5,14 @@ from . import config
 
 def parse_enroll(roster_path):
     # TODO: validate file format
-    with open(roster_path, 'r') as csvfile:
-        roster = csv.reader(csvfile)
+    print "Importing roster:", roster_path
+    with open(roster_path, 'r') as roster_file:
         members_coll = connection[config['course_name']][Member.__collection__]
-        headers = roster.next()
-        def col_for(colname):
-            for i, name in enumerate(headers):
-                if name == colname:
-                    return i
-            return
-        for row in roster:
-            sid_entry = row[col_for('Student ID')]
-            sid = int(re.search(r'\d+', sid_entry).group())
-            # inserts new SIDs, preserves existing ones
-            new_member = dict(connection.Member())
-            new_member['sid'] = sid
-            members_coll.update(
-                    {'sid': sid, 'registered': False},
-                    {'$set':new_member},
-                    upsert=True)
+        student_ids = roster_file.readlines()
+        for sid in student_ids:
+            new_member = connection.Member()
+            new_member['sid'] = int(sid.strip())
+            new_member.save()
 
 if __name__ == '__main__':
     import argparse

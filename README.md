@@ -49,15 +49,15 @@
 5. Run the git infra.
 
     If this is your first time, you have a few options. If you don't have any
-    account forms, you can run the infra with spoof accounts like so:
+    account forms and registered student ids, you can run the infra with spoof accounts like so:
 
         $ ./start --test-init
 
     If this is production and you *do* have a folder full of bulk account form
-    pdfs, then you should put all of the student bulk account forms into one
+    pdfs and a roster file with a list of the registered SIDs (one per line), then you should put all of the student bulk account forms into one
     folder and run the infra like so:
 
-        $ ./start --bulk-account-dir <account-dir> --min-login-len <2, 3>
+        $ ./start --bulk-account-dir <account-dir> --min-login-len <2, 3> --roster <roster_file>
 
     Otherwise, if running the infra after initialization, simply use:
 
