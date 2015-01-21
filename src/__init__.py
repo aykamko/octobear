@@ -31,7 +31,7 @@ import sys
 logdir = config['log_dir']
 logfile = logdir + "/octobear.log"
 try:
-    os.mkdir(os.path.dirname(logfile))
+    os.mkdir(logdir)
 except OSError:
     pass
 
