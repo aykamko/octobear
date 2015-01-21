@@ -35,7 +35,7 @@ class GitHub:
             if response.ok:
                 responses.append(response)
                 if followLink and "next" in response.links:
-                    url = response.links["next"]
+                    url = response.links["next"]['url']
                 else:
                     return responses
             else:
