@@ -93,10 +93,11 @@ def email_results(recipients, assignment_name, email_content):
     Emails autograder output to recipient students.
     """
     subject = '[{0} Autograder] {1} Results'.format(config['course-name'], assignment_name)
-    if email_plain:
-        emailer.send_plaintext(recipients, subject, email_content);
-    else:
-        emailer.send_markdown(recipients, subject, email_content);
+    for recipient in recipients:
+        if email_plain:
+            emailer.send_plaintext(recipient, subject, email_content)
+        else:
+            emailer.send_markdown(recipient, subject, email_content)
 
 
 class AutograderResultHandler(BaseHTTPServer.BaseHTTPRequestHandler):
