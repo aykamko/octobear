@@ -56,8 +56,8 @@ def attach_files(msg, files):
         with open(f, 'rb') as fil:
             filename = os.path.basename(fil.name)
             attachment = MIMEApplication(fil.read(), _subtype=os.path.splitext(filename)[1][1:])
-            attachment.add_header('content-disposition', 'attachment',
-                    filename=('utf-8', '', filename))
+            attachment.add_header('Content-Disposition', 'attachment',
+                    filename=filename)
             msg.attach(attachment)
 
 # Authenticates, then actually sends the message
