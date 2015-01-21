@@ -1,0 +1,48 @@
+body {
+    font-family: Open Sans, Helvetica, Arial, sans-serif;
+    margin: 0;
+    background-color: #EFEFEF;
+}
+form li {
+    line-height: 40px;
+    font-size: 15px;
+}
+label {
+    margin-left: 10px;
+    font-weight: 600;
+}
+input {
+    width: 200px;
+    padding: 10px;
+}
+input[type="submit"] {
+    margin-top: 20px;
+}
+#register-form {
+    width: 400px;
+    padding: 20px;
+    border: 1px solid #59a3d7;
+    background-color: white;
+    position: fixed;
+    top: calc(50% - 180px);
+    left: calc(50% - 221px);
+}
+.title {
+    font-weight: 400;
+    text-align: center;
+    color: #59a3d7;
+    font-size: 24px;
+    padding-bottom: 10px;
+}
+.instructions {
+    text-align: center;
+    line-height: 22px;
+    font-size: 14px;
+    margin: 5px 0;
+}
+form + ul {
+    margin-top: 30px;
+    font-size: 14px;
+    color: #cc0000;
+}
+
