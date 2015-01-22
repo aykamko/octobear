@@ -56,12 +56,12 @@ def handle_result(data):
 
     if email_content:
         recipients = []
-        if group_repo:
+        if not group_repo:
             recipients.append(owner['email'])
         else:
             recipients.extend([student['email'] for student in
                 conn.Member.find({'_id': {'$in': owner['members']}})])
-        email_results(recipients, assignment['name'], email_content)
+        email_results(recipients, assignment['name'], email_content, email_plain)
 
     if raw_output:
         logger.info(raw_output)
@@ -88,11 +88,11 @@ def submit_grade(assignment_id, owner_id, group_repo, score,
         new_grade.save() # re-save grade to set up relations
 
 grade_coll = conn[config['course_name']][Grade.__collection__]
-def email_results(recipients, assignment_name, email_content):
+def email_results(recipients, assignment_name, email_content, email_plain=True):
     """
     Emails autograder output to recipient students.
     """
-    subject = '[{0} Autograder] {1} Results'.format(config['course-name'], assignment_name)
+    subject = '[{0} Autograder] {1} Results'.format(config['course_name'], assignment_name)
     for recipient in recipients:
         if email_plain:
             emailer.send_plaintext(recipient, subject, email_content)
