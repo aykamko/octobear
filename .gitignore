@@ -1,3 +1,6 @@
+# Ignore actual config
+src/config
+
 # Ignore logs
 **/log
 

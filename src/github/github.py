@@ -174,7 +174,12 @@ class GitHub:
     def createHook(self, repoName, jenkinsHookURL):
         postData = {
                 "name": "jenkins",
-                "config": {"url": jenkinsHookURL},
+                "active": True,
+                "config": {
+                    "url": jenkinsHookURL,
+                    "jenkins_hook_url": jenkinsHookURL, # wat
+                    "content_type": "json"
+                    },
                 "events": ["push"],
                 }
         endpoint = "repos/%s/%s/hooks" % (self.orgName, repoName)
