@@ -69,6 +69,10 @@ def register_member((sid, user_data)):
             )
 
 class RegistrationHandler(BaseHTTPServer.BaseHTTPRequestHandler):
+
+    error_message_format = '[%(code)d] %(message)s'
+    error_content_type = 'text/plaintext'
+
     def __init__(self, request, client_address, server):
         BaseHTTPServer.BaseHTTPRequestHandler.__init__(self, request, client_address, server)
 

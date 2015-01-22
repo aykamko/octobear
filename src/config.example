@@ -10,7 +10,7 @@ ag_result_server_host = localhost
 ag_result_server_port = 9001
 
 # jenkins
-jenkins_hook = http://alekskamko.com
+jenkins_hook = http://cs61b.eecs.berkeley.edu/jenkins/github-webhook/
 
 # email settings
 email_from = cs61b@imail.eecs.berkeley.edu
