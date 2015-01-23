@@ -65,7 +65,8 @@ def attach_files(msg, files):
 def _send(msg):
     s = smtplib.SMTP(config['smtp_host'], int(config['smtp_port']))
     s.starttls()
-    s.login(config['email_username'], config['email_password'])
+    if 'email_username' in config and 'email_password' in config:
+        s.login(config['email_username'], config['email_password'])
     s.sendmail(msg['From'], msg['To'], msg.as_string())
     s.quit()
 
