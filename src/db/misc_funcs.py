@@ -10,8 +10,8 @@ from .schema import *
 from .. import config, jprint, emailer
 from ..github.github import github
 
-accounts_coll = connection[config['course_name']][Account.__collection__]
-members_coll = connection[config['course_name']][Member.__collection__]
+accounts_coll = connection.Account.collection
+members_coll = connection.Member.collection
 
 def free_all_accounts():
     accounts_coll.update(
