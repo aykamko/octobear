@@ -8,7 +8,7 @@
 import os
 from .schema import *
 from .. import config, jprint, emailer
-from ..github.github import github
+from ..github.github import github, GitHubApiError
 
 accounts_coll = connection.Account.collection
 members_coll = connection.Member.collection
@@ -45,5 +45,36 @@ def regenerate_github(student):
             student['login'],
             [student['github']],
             config['jenkins_hook'])
+
+# Redos every step in the github hookup process
+# Idempotent
+def redo_github(student):
+    teamName, repoName = student['login'], student['login']
+    try:
+        github.createRepo(repoName)
+        print "Created repo: " + repoName
+    except GitHubApiError:
+        # print "Repo exists: " + repoName
+        pass
+
+    try:
+        teamID = github.createTeam(teamName)
+        github.addTeamMembers(teamID, [student['github']])
+        print "Created team: " + teamName
+    except GitHubApiError:
+        # print "Team exists: " + teamName
+        pass
+
+    github.createHook(repoName, config['jenkins_hook'])
+    # print "Created hook"
+
+    print "Finished student " + str(student['sid'])
+
+def redo_everyone():
+    for student in connection.Member.find():
+        if student['registered'] and student['login']:
+            redo_github(student)
+        else:
+            print "Skipped student" + str(student['sid'])
 
 get_s = get_student
