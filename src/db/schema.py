@@ -3,7 +3,7 @@ import datetime
 import json
 import re
 
-from .. import config
+from .. import config, jprint
 from . import connection
 
 """
@@ -34,9 +34,14 @@ def id_collection_class_validator(_class):
 """
 schemas
 """
-class Member(Document):
-    __collection__ = 'members'
+class OctobearDocument(Document):
     __database__ = config['course_name']
+
+    def __str__(self):
+        return jprint.pformat(self)
+
+class Member(OctobearDocument):
+    __collection__ = 'members'
     structure = {
         'sid': int,
         'login': basestring,
@@ -59,9 +64,8 @@ class Member(Document):
         }
     ]
 
-class Group(Document):
+class Group(OctobearDocument):
     __collection__ = 'groups'
-    __database__ = config['course_name']
     structure = {
         'name': basestring,
         'members': Set(ObjectId), # Member
@@ -76,9 +80,8 @@ class Group(Document):
         }
     ]
 
-class Account(Document):
+class Account(OctobearDocument):
     __collection__ = 'accounts'
-    __database__ = config['course_name']
     structure = {
         'login': basestring,
         'assigned': bool
@@ -93,9 +96,8 @@ class Account(Document):
         }
     ]
 
-class Assignment(Document):
+class Assignment(OctobearDocument):
     __collection__ = 'assignments'
-    __database__ = config['course_name']
     structure = {
         'name': basestring,
         'max_score': float,
@@ -110,9 +112,8 @@ class Assignment(Document):
         }
     ]
 
-class Grade(Document):
+class Grade(OctobearDocument):
     __collection__ = 'grades'
-    __database__ = config['course_name']
     structure = {
         'assignment': ObjectId, # Assignment
         'owner': ObjectId, # Member OR Group
