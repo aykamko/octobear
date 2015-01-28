@@ -9,6 +9,7 @@ import os
 from .schema import *
 from .. import config, jprint, emailer
 from ..github.github import github, GitHubApiError
+from ..account import account_forms_directory
 
 accounts_coll = connection.Account.collection
 members_coll = connection.Member.collection
@@ -32,7 +33,7 @@ def get_student(sid):
     return s
 
 def resend_registration_info(student):
-    account_form = os.path.realpath('./account_forms') + ('/%s.pdf' % (student['login']))
+    account_form = os.path.join(account_forms_directory, "%s.pdf" % student["login"])
     emailer.send_template(
             student['email'],
             '[{0}] Registered!'.format(config['course_name']),
