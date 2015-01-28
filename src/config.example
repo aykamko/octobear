@@ -2,7 +2,7 @@ course_name = 61b
 
 gh_organization = Berkeley-CS61B
 gh_user = BearBot-61B
-gh_pass = ***REMOVED***
+gh_pass = after hours diving crux
 
 registration_server_host = localhost
 registration_server_port = 8000
@@ -15,7 +15,7 @@ jenkins_hook = http://cs61b.eecs.berkeley.edu/jenkins/github-webhook/
 # email settings
 email_from = cs61b@imail.eecs.berkeley.edu
 email_username = postmaster@mg.flow.moe
-email_password = ***REMOVED***
+email_password = 49ab43a25cf9775a68084d8d076bdde3
 smtp_host = smtp.mailgun.org
 smtp_port = 587
 

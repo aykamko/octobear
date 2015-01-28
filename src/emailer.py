@@ -35,11 +35,11 @@ def send_mixed(to_address, subject, plaintext=None, html=None, files=[]):
     msg = MIMEMultipart('alternative')
 
     if plaintext:
-        part1 = MIMEText(plaintext, 'plain')
+        part1 = MIMEText(plaintext, 'plain', 'utf-8')
         msg.attach(part1)
 
     if html:
-        part2 = MIMEText(html, 'html')
+        part2 = MIMEText(html, 'html', 'utf-8')
         msg.attach(part2)
 
     # See http://stackoverflow.com/a/17115349/1222351 for MIME structure
